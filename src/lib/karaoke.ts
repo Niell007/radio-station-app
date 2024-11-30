@@ -36,6 +36,15 @@ export interface KaraokeSearchParams {
     per_page?: number;
 }
 
+export interface KaraokeListParams {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort?: string;
+    order?: 'asc' | 'desc';
+    filter?: string;
+}
+
 export class KaraokeError extends Error {
     constructor(message: string) {
         super(message);
@@ -297,5 +306,69 @@ export class KaraokeManager {
             SELECT * FROM karaoke_stats
         `).first();
         return results;
+    }
+
+    async list(params: KaraokeListParams = {}): Promise<{ files: KaraokeFile[], total: number }> {
+        const conditions: string[] = ['is_active = 1'];
+        const values: any[] = [];
+
+        // Handle search
+        if (params.search?.trim()) {
+            conditions.push('search_vector LIKE ?');
+            values.push(`%${params.search.toLowerCase()}%`);
+        }
+
+        // Handle filters
+        switch (params.filter) {
+            case 'explicit':
+                conditions.push('is_explicit = 1');
+                break;
+            case 'clean':
+                conditions.push('is_explicit = 0');
+                break;
+            case 'withLyrics':
+                conditions.push('lyrics_url IS NOT NULL');
+                break;
+            case 'noLyrics':
+                conditions.push('lyrics_url IS NULL');
+                break;
+        }
+
+        // Build WHERE clause
+        const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+        // Handle sorting
+        let orderBy = 'uploaded_at DESC';
+        if (params.sort) {
+            const direction = params.order === 'asc' ? 'ASC' : 'DESC';
+            orderBy = `${params.sort} ${direction}`;
+        }
+
+        // Handle pagination
+        const page = Math.max(1, params.page || 1);
+        const limit = Math.min(100, Math.max(1, params.limit || 10));
+        const offset = (page - 1) * limit;
+
+        // Get total count
+        const countResult = await this.db.prepare(`
+            SELECT COUNT(*) as count FROM karaoke_files ${where}
+        `).bind(...values).first<{ count: number }>();
+
+        // Get paginated results
+        const results = await this.db.prepare(`
+            SELECT * FROM karaoke_files
+            ${where}
+            ORDER BY ${orderBy}
+            LIMIT ? OFFSET ?
+        `).bind(...values, limit, offset).all<KaraokeFile>();
+
+        return {
+            files: results.results.map(result => ({
+                ...result,
+                is_explicit: Boolean(result.is_explicit),
+                is_active: Boolean(result.is_active)
+            })),
+            total: countResult?.count || 0
+        };
     }
 } 

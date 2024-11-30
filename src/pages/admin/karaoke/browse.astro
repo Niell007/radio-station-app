@@ -1,0 +1,118 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { KaraokeList } from '../../../components/admin/KaraokeList';
+import type { KaraokeFile } from '../../../components/admin/KaraokeList';
+import { KaraokeManager } from '../../../lib/karaoke';
+
+// Get query parameters
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+const search = Astro.url.searchParams.get('search') || '';
+const sort = Astro.url.searchParams.get('sort') || 'uploadedAt';
+const order = (Astro.url.searchParams.get('order') || 'desc') as 'asc' | 'desc';
+const filter = Astro.url.searchParams.get('filter') || '';
+
+// Get files from database
+const manager = new KaraokeManager(Astro.locals.runtime.env.DB);
+const { files: dbFiles, total } = await manager.list({
+    page,
+    limit,
+    search,
+    sort,
+    order,
+    filter
+});
+
+// Transform files to match KaraokeList component interface
+const files: KaraokeFile[] = dbFiles.map(file => ({
+    id: file.id!,
+    title: file.title,
+    artist: file.artist,
+    language: file.language,
+    genre: file.genre || undefined,
+    fileUrl: file.file_url,
+    lyricsUrl: file.lyrics_url || null,
+    uploadedAt: new Date(file.uploaded_at!),
+    duration: file.duration,
+    fileSize: file.file_size,
+    mimeType: file.mime_type,
+    difficulty: file.difficulty,
+    isExplicit: file.is_explicit || false
+}));
+
+const totalPages = Math.ceil(total / limit);
+---
+
+<AdminLayout title="Browse Karaoke Files">
+    <div class="space-y-6">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Browse Karaoke Files</h1>
+            <a
+                href="/admin/karaoke/upload"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                Upload New Files
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="p-4 border-b">
+                <form class="flex gap-4">
+                    <div class="flex-1">
+                        <input
+                            type="search"
+                            name="search"
+                            value={search}
+                            placeholder="Search by title, artist..."
+                            class="w-full px-4 py-2 border rounded-lg"
+                        />
+                    </div>
+                    <select
+                        name="filter"
+                        class="px-4 py-2 border rounded-lg bg-white"
+                        value={filter}
+                    >
+                        <option value="">All Files</option>
+                        <option value="explicit">Explicit Only</option>
+                        <option value="clean">Clean Only</option>
+                        <option value="withLyrics">With Lyrics</option>
+                        <option value="noLyrics">Without Lyrics</option>
+                    </select>
+                    <select
+                        name="sort"
+                        class="px-4 py-2 border rounded-lg bg-white"
+                        value={`${sort}-${order}`}
+                    >
+                        <option value="uploadedAt-desc">Newest First</option>
+                        <option value="uploadedAt-asc">Oldest First</option>
+                        <option value="title-asc">Title A-Z</option>
+                        <option value="title-desc">Title Z-A</option>
+                        <option value="artist-asc">Artist A-Z</option>
+                        <option value="artist-desc">Artist Z-A</option>
+                    </select>
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+                    >
+                        Apply Filters
+                    </button>
+                </form>
+            </div>
+
+            <div class="p-4">
+                <KaraokeList
+                    files={files}
+                    currentPage={page}
+                    totalPages={totalPages}
+                    client:load
+                />
+            </div>
+        </div>
+
+        {total === 0 && (
+            <div class="text-center py-12 text-gray-500">
+                No karaoke files found. Try adjusting your search or filters.
+            </div>
+        )}
+    </div>
+</AdminLayout> 

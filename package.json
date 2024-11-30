@@ -25,7 +25,12 @@
     "seed-db": "node scripts/seed-db.js",
     "analyze": "astro build --analyze",
     "clean": "rimraf dist .astro .turbo node_modules",
-    "import-karaoke-sql": "node scripts/import-karaoke-sql.js"
+    "import-karaoke-sql": "node scripts/import-karaoke-sql.js",
+    "deploy:pages": "npm run build && wrangler pages deploy dist",
+    "deploy:preview": "npm run build && wrangler pages deploy dist --branch=$CF_PAGES_BRANCH",
+    "deploy:production": "npm run build && wrangler pages deploy dist --branch=main --production",
+    "check": "npm run type-check && npm run lint",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^11.2.0",
@@ -52,7 +57,8 @@
     "zustand": "^5.0.1",
     "@heroicons/react": "^2.1.1",
     "apexcharts": "^3.45.2",
-    "react-apexcharts": "^1.4.1"
+    "react-apexcharts": "^1.4.1",
+    "web-audio-api": "^0.2.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",

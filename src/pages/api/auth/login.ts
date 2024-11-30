@@ -1,81 +1,108 @@
 import type { APIRoute } from 'astro';
-import { verify } from '@node-rs/argon2';
-import { prisma } from '../../../lib/prisma';
+import * as argon2 from '@node-rs/argon2';
 import { z } from 'zod';
-import { randomBytes } from 'crypto';
 
+// Define the login request schema
 const loginSchema = z.object({
-  username: z.string(),
-  password: z.string()
+    email: z.string().email(),
+    password: z.string().min(6)
 });
 
-export const POST: APIRoute = async ({ request }) => {
-  try {
-    const body = await request.json();
-    const { username, password } = loginSchema.parse(body);
+// Define the database user type
+interface DBUser {
+    id: number;
+    email: string;
+    password_hash: string;
+    role: string;
+}
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { username }
-    });
+// Simple JWT implementation
+function createJWT(payload: any, secret: string): string {
+    const header = { alg: 'HS256', typ: 'JWT' };
+    const now = Math.floor(Date.now() / 1000);
+    const claims = {
+        ...payload,
+        iat: now,
+        exp: now + 86400 // 24 hours
+    };
 
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid username or password' }),
-        { status: 401 }
-      );
-    }
-
-    // Verify password
-    const validPassword = await verify(user.passwordHash, password);
-    if (!validPassword) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid username or password' }),
-        { status: 401 }
-      );
-    }
-
-    // Create session
-    const sessionId = randomBytes(32).toString('hex');
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
-
-    await prisma.session.create({
-      data: {
-        id: sessionId,
-        userId: user.id,
-        expiresAt
-      }
-    });
-
-    return new Response(
-      JSON.stringify({
-        sessionId,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        }
-      }),
-      {
-        status: 200,
-        headers: {
-          'Set-Cookie': `session=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Expires=${expiresAt.toUTCString()}`
-        }
-      }
+    const base64Header = btoa(JSON.stringify(header));
+    const base64Payload = btoa(JSON.stringify(claims));
+    const signature = btoa(
+        JSON.stringify({
+            data: base64Header + '.' + base64Payload,
+            secret
+        })
     );
-  } catch (error) {
-    console.error('Login error:', error);
-    if (error instanceof z.ZodError) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid input data', details: error.errors }),
-        { status: 400 }
-      );
+
+    return `${base64Header}.${base64Payload}.${signature}`;
+}
+
+export const POST: APIRoute = async ({ request, locals }) => {
+    try {
+        const data = await request.json();
+        // Validate and parse the request data
+        const { email, password } = loginSchema.parse(data);
+
+        // Get user from database
+        const user = await locals.runtime.env.DB
+            .prepare('SELECT * FROM users WHERE email = ?')
+            .bind(email)
+            .first<DBUser>();
+
+        if (!user) {
+            return new Response(JSON.stringify({
+                error: 'Invalid email or password'
+            }), { status: 401 });
+        }
+
+        // Verify password
+        const isValid = await argon2.verify(user.password_hash, password);
+        if (!isValid) {
+            return new Response(JSON.stringify({
+                error: 'Invalid email or password'
+            }), { status: 401 });
+        }
+
+        // Generate session token
+        const token = createJWT(
+            { sub: user.id.toString(), role: user.role },
+            process.env.SESSION_SECRET || 'your-secret-key'
+        );
+
+        // Create session in database
+        const sessionId = crypto.randomUUID();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 1);
+
+        await locals.runtime.env.DB
+            .prepare('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)')
+            .bind(sessionId, user.id, expiresAt.toISOString())
+            .run();
+
+        return new Response(JSON.stringify({
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role
+            }
+        }), {
+            status: 200,
+            headers: {
+                'Set-Cookie': `session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400`
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        if (error instanceof z.ZodError) {
+            return new Response(JSON.stringify({
+                error: 'Invalid input',
+                details: error.errors
+            }), { status: 400 });
+        }
+        return new Response(JSON.stringify({
+            error: 'Internal server error'
+        }), { status: 500 });
     }
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500 }
-    );
-  }
 }; 

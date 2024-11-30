@@ -6,20 +6,31 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare({
-    mode: 'directory'
+    mode: 'directory',
+    functionPerRoute: true,
+    runtime: {
+      mode: 'local',
+      type: 'pages'
+    }
   }),
-  integrations: [
-    react(),
-    tailwind({
-      // Disable the default base styles
-      applyBaseStyles: false
-    })
-  ],
+  integrations: [react(), tailwind()],
   vite: {
     build: {
       rollupOptions: {
-        external: ['better-sqlite3']
+        external: ['crypto']
       }
+    },
+    ssr: {
+      noExternal: ['@heroicons/*', 'flowbite-react', 'apexcharts', 'react-apexcharts', 'jose'],
+      external: ['crypto']
+    },
+    resolve: {
+      alias: {
+        crypto: 'crypto-browserify'
+      }
+    },
+    optimizeDeps: {
+      include: ['jose']
     }
   }
 }); 

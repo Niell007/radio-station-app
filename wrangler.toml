@@ -1,6 +1,6 @@
 name = "radio-station-app"
 main = "./dist/server/entry.mjs"
-compatibility_date = "2023-11-21"
+compatibility_date = "2024-01-29"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
@@ -32,3 +32,27 @@ preview_database_id = "radio-station-db-preview"
 
 [site]
 bucket = "./dist/client"
+
+[build]
+command = "npm run build"
+watch_dir = "src"
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+workers_dev = false
+route = "radio-station.pages.dev/*"
+
+[env.preview]
+workers_dev = true
+
+[cache]
+[cache.assets]
+browser_ttl = 31536000 # 1 year
+serve_stale = true
+
+[[headers]]
+for = "/assets/*"
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"

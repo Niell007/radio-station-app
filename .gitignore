@@ -1,36 +1,54 @@
+# build output
+dist/
+.output/
+.astro/
 
-
- /dist/public
-
-# dev
-.yarn/
-!.yarn/releases
-.vscode/*
-!.vscode/launch.json
-!.vscode/*.code-snippets
-.idea/workspace.xml
-.idea/usage.statistics.xml
-.idea/shelf
-
-# deps
+# dependencies
 node_modules/
-.wrangler
-
-# env
-.env
-.env.production
-.dev.vars
 
 # logs
-logs/
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# misc
+# environment variables
+.env
+.env.production
+.env.local
+.env.development
+
+# macOS-specific files
 .DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage directory
+coverage/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# Prisma
+prisma/.env
+prisma/migrations/
+prisma/dev.db
+prisma/dev.db-journal
+
+# Temp files
+.tmp/
+.temp/
+.cache/
+
+# Build stats
+stats.html
 
 
