@@ -24,7 +24,8 @@
     "deploy": "wrangler deploy",
     "seed-db": "node scripts/seed-db.js",
     "analyze": "astro build --analyze",
-    "clean": "rimraf dist .astro .turbo node_modules"
+    "clean": "rimraf dist .astro .turbo node_modules",
+    "import-karaoke-sql": "node scripts/import-karaoke-sql.js"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^11.2.0",
