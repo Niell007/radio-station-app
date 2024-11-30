@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import * as argon2 from '@node-rs/argon2';
+import * as bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
 // Define the login request schema
@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         }
 
         // Verify password
-        const isValid = await argon2.verify(user.password_hash, password);
+        const isValid = await bcrypt.compare(password, user.password_hash);
         if (!isValid) {
             return new Response(JSON.stringify({
                 error: 'Invalid email or password'

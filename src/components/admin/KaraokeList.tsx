@@ -9,7 +9,7 @@ export interface KaraokeFile {
   title: string;
   artist: string;
   language: string;
-  genre?: string;
+  genre: string | null;
   fileUrl: string;
   lyricsUrl: string | null;
   uploadedAt: Date;

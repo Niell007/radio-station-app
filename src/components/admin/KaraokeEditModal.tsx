@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Label, TextInput, Select } from 'flowbite-react';
 
 interface KaraokeFile {
@@ -7,6 +7,14 @@ interface KaraokeFile {
   artist: string;
   language: string;
   genre: string | null;
+  fileUrl: string;
+  lyricsUrl: string | null;
+  uploadedAt: Date;
+  duration: number;
+  fileSize: number;
+  mimeType: string;
+  difficulty?: number;
+  isExplicit: boolean;
 }
 
 interface KaraokeEditModalProps {
@@ -17,21 +25,46 @@ interface KaraokeEditModalProps {
 }
 
 export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditModalProps) {
-  const [formData, setFormData] = useState<Partial<KaraokeFile>>(file || {});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    artist: '',
+    language: '',
+    genre: '',
+    difficulty: '',
+    isExplicit: false
+  });
+
+  useEffect(() => {
+    if (file) {
+      setFormData({
+        title: file.title,
+        artist: file.artist,
+        language: file.language,
+        genre: file.genre || '',
+        difficulty: file.difficulty?.toString() || '',
+        isExplicit: file.isExplicit
+      });
+    }
+  }, [file]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
 
-    setIsSubmitting(true);
     try {
       const response = await fetch(`/api/admin/karaoke/${file.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          title: formData.title,
+          artist: formData.artist,
+          language: formData.language,
+          genre: formData.genre || null,
+          difficulty: formData.difficulty ? parseInt(formData.difficulty) : null,
+          isExplicit: formData.isExplicit
+        })
       });
 
       if (!response.ok) {
@@ -42,8 +75,6 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
     } catch (error) {
       console.error('Error updating file:', error);
       alert('Failed to update file');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -59,7 +90,7 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <TextInput
                 id="title"
-                value={formData.title || ''}
+                value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
               />
@@ -71,7 +102,7 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <TextInput
                 id="artist"
-                value={formData.artist || ''}
+                value={formData.artist}
                 onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
                 required
               />
@@ -83,7 +114,7 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <Select
                 id="language"
-                value={formData.language || ''}
+                value={formData.language}
                 onChange={(e) => setFormData({ ...formData, language: e.target.value })}
                 required
               >
@@ -106,7 +137,7 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <Select
                 id="genre"
-                value={formData.genre || ''}
+                value={formData.genre}
                 onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
                 required
               >
@@ -119,16 +150,30 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
                 <option value="jazz">Jazz</option>
                 <option value="classical">Classical</option>
                 <option value="electronic">Electronic</option>
-                <option value="folk">Folk</option>
-                <option value="other">Other</option>
+              </Select>
+            </div>
+
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="difficulty" value="Difficulty" />
+              </div>
+              <Select
+                id="difficulty"
+                value={formData.difficulty}
+                onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+              >
+                <option value="">Select difficulty</option>
+                <option value="1">1 - Beginner</option>
+                <option value="2">2 - Easy</option>
+                <option value="3">3 - Medium</option>
+                <option value="4">4 - Hard</option>
+                <option value="5">5 - Expert</option>
               </Select>
             </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
-          </Button>
+          <Button type="submit">Save Changes</Button>
           <Button color="gray" onClick={onClose}>
             Cancel
           </Button>

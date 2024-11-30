@@ -16,21 +16,17 @@ export default defineConfig({
   integrations: [react(), tailwind()],
   vite: {
     build: {
-      rollupOptions: {
-        external: ['crypto']
-      }
+      target: 'esnext',
+      minify: 'esbuild'
     },
     ssr: {
-      noExternal: ['@heroicons/*', 'flowbite-react', 'apexcharts', 'react-apexcharts', 'jose'],
-      external: ['crypto']
-    },
-    resolve: {
-      alias: {
-        crypto: 'crypto-browserify'
-      }
+      noExternal: ['@heroicons/*', 'flowbite-react', 'jose']
     },
     optimizeDeps: {
-      include: ['jose']
+      exclude: ['@node-rs/argon2']
+    },
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
     }
   }
 }); 

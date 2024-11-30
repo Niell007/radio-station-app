@@ -1,18 +1,19 @@
 export async function getAudioDuration(file: File): Promise<number> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const arrayBuffer = e.target?.result as ArrayBuffer;
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        resolve(Math.round(audioBuffer.duration));
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
+    const url = URL.createObjectURL(file);
+    const audio = new Audio();
+
+    audio.addEventListener('loadedmetadata', () => {
+      URL.revokeObjectURL(url);
+      resolve(audio.duration);
+    });
+
+    audio.addEventListener('error', (error) => {
+      URL.revokeObjectURL(url);
+      reject(error);
+    });
+
+    audio.src = url;
   });
 }
 
@@ -25,22 +26,21 @@ export function formatDuration(seconds: number): string {
 export async function processAudioBatch(
   files: File[],
   onProgress: (progress: number) => void,
-  onComplete: () => void
-): Promise<{ file: File; duration: number }[]> {
-  const results = [];
+  onError: (error: Error) => void
+): Promise<Array<{ file: File; duration: number }>> {
+  const results: Array<{ file: File; duration: number }> = [];
   let processed = 0;
 
   for (const file of files) {
     try {
       const duration = await getAudioDuration(file);
       results.push({ file, duration });
+      processed++;
+      onProgress((processed / files.length) * 100);
     } catch (error) {
-      console.error(`Error processing ${file.name}:`, error);
+      onError(error instanceof Error ? error : new Error('Failed to process audio file'));
     }
-    processed++;
-    onProgress((processed / files.length) * 100);
   }
 
-  onComplete();
   return results;
 } 

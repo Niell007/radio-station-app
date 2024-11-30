@@ -12,6 +12,10 @@ interface D1Result<T = unknown> extends D1Response {
 interface Env {
   DB: D1Database;
   MUSIC_STORAGE: R2Bucket;
+  BUCKET: R2Bucket;
+  BUCKET_URL: string;
+  COVER_ART_STORAGE: R2Bucket;
+  USER_CONTENT_STORAGE: R2Bucket;
   AI: {
     run: (model: string, options: { text: string[] }) => Promise<{
       data: Array<{ embedding: number[] }>;
@@ -25,6 +29,11 @@ declare namespace App {
       env: Env;
     };
     env: Env;
+    user?: {
+      id: number;
+      email: string;
+      role: string;
+    };
   }
 }
 
@@ -39,6 +48,7 @@ interface Window {
       duration: number;
     }) => void;
   };
+  webkitAudioContext: typeof AudioContext;
 }
 
 // Database types
@@ -114,4 +124,6 @@ interface DBKaraokeFile {
   search_vector: string;
   uploaded_at: string;
   updated_at: string;
+  is_explicit?: boolean;
+  difficulty?: number;
 } 
