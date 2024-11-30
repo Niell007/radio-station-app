@@ -1,0 +1,124 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { prisma } from '../../lib/prisma';
+
+// Fetch dashboard stats
+const stats = await Promise.all([
+  prisma.show.count(),
+  prisma.song.count(),
+  prisma.playlist.count(),
+  prisma.user.count()
+]);
+
+const [showCount, songCount, playlistCount, userCount] = stats;
+---
+
+<AdminLayout title="Dashboard">
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <!-- Shows Stats -->
+    <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Shows</h3>
+        <a href="/admin/shows" class="inline-flex items-center p-2 text-sm font-medium rounded-lg text-primary-700 hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
+          View all
+        </a>
+      </div>
+      <div class="flex items-center mb-2">
+        <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
+          <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{showCount}</p>
+          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Total shows</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Songs Stats -->
+    <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Songs</h3>
+        <a href="/admin/songs" class="inline-flex items-center p-2 text-sm font-medium rounded-lg text-primary-700 hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
+          View all
+        </a>
+      </div>
+      <div class="flex items-center mb-2">
+        <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
+          <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{songCount}</p>
+          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Total songs</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Playlists Stats -->
+    <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Playlists</h3>
+        <a href="/admin/playlists" class="inline-flex items-center p-2 text-sm font-medium rounded-lg text-primary-700 hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
+          View all
+        </a>
+      </div>
+      <div class="flex items-center mb-2">
+        <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
+          <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{playlistCount}</p>
+          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Total playlists</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Stats -->
+    <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Users</h3>
+        <a href="/admin/users" class="inline-flex items-center p-2 text-sm font-medium rounded-lg text-primary-700 hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
+          View all
+        </a>
+      </div>
+      <div class="flex items-center mb-2">
+        <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
+          <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{userCount}</p>
+          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Total users</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="mt-8 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h3>
+    </div>
+    <div class="relative overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">Type</th>
+            <th scope="col" class="px-6 py-3">Name</th>
+            <th scope="col" class="px-6 py-3">User</th>
+            <th scope="col" class="px-6 py-3">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Add recent activity items here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</AdminLayout> 

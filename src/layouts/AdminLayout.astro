@@ -1,0 +1,54 @@
+---
+import { getUser } from '../middleware/auth';
+import { Sidebar } from '../components/admin/Sidebar';
+import { Navbar } from '../components/admin/Navbar';
+import '../styles/base.css';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const user = await getUser(Astro);
+
+// Redirect if not authenticated or not admin
+if (!user || user.role !== 'admin') {
+  return Astro.redirect('/login');
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} - Radio Station Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900">
+    <Navbar user={user} client:load />
+    
+    <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
+      <Sidebar client:load />
+      
+      <div id="main-content" class="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
+        <main>
+          <div class="px-4 pt-6">
+            <slot />
+          </div>
+        </main>
+        
+        <footer class="p-4 my-6 mx-4 bg-white rounded-lg shadow md:flex md:items-center md:justify-between md:p-6 xl:p-8 dark:bg-gray-800">
+          <p class="mb-4 text-sm text-center text-gray-500 dark:text-gray-400 md:mb-0">
+            &copy; {new Date().getFullYear()} Radio Station Admin. All rights reserved.
+          </p>
+        </footer>
+      </div>
+    </div>
+    
+    <script>
+      // Initialize Flowbite
+      import 'flowbite';
+    </script>
+  </body>
+</html> 

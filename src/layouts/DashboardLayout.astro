@@ -1,0 +1,99 @@
+---
+import Layout from './Layout.astro';
+import { getUser } from '../middleware/auth';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const user = await getUser(Astro);
+
+// Redirect if not logged in
+if (!user) {
+  return Astro.redirect('/login');
+}
+---
+
+<Layout title={title}>
+  <div class="min-h-screen">
+    <!-- Sidebar -->
+    <aside class="fixed top-0 left-0 h-screen w-64 bg-black bg-opacity-90 text-white">
+      <div class="p-4">
+        <img src="/images/general/logo.jpg" alt="Soundmaster Radio" class="h-12 mb-8">
+        
+        <nav class="space-y-2">
+          <a href="/dashboard" class="block px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+            Dashboard
+          </a>
+          
+          <a href="/dashboard/shows" class="block px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+            Shows
+          </a>
+          
+          <a href="/dashboard/playlists" class="block px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+            Playlists
+          </a>
+          
+          <a href="/dashboard/requests" class="block px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+            Song Requests
+          </a>
+          
+          {user.role === 'admin' && (
+            <>
+              <div class="my-4 border-t border-gray-700"></div>
+              
+              <a href="/dashboard/users" class="block px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                Users
+              </a>
+              
+              <a href="/dashboard/settings" class="block px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                Settings
+              </a>
+            </>
+          )}
+        </nav>
+      </div>
+      
+      <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium">{user.username}</p>
+            <p class="text-xs text-gray-400">{user.role}</p>
+          </div>
+          
+          <button id="logoutBtn" class="text-sm text-red-400 hover:text-red-300">
+            Logout
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="ml-64 p-8">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold text-white">{title}</h1>
+      </header>
+      
+      <div class="bg-white bg-opacity-10 rounded-lg backdrop-blur-sm">
+        <slot />
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<script>
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  });
+</script> 

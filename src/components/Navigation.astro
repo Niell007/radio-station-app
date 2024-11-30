@@ -1,0 +1,33 @@
+---
+const navItems = [
+  { name: 'Home', image: '/images/buttons/btn_1.jpg', hoverImage: '/images/buttons/btn_1_over.jpg', href: '/' },
+  { name: 'Shows', image: '/images/buttons/btn_2.jpg', hoverImage: '/images/buttons/btn_2_over.jpg', href: '/shows' },
+  { name: 'News', image: '/images/buttons/btn_3.jpg', hoverImage: '/images/buttons/btn_3_over.jpg', href: '/news' },
+  { name: 'About', image: '/images/buttons/btn_4.jpg', hoverImage: '/images/buttons/btn_4_over.jpg', href: '/about' },
+  { name: 'Contact', image: '/images/buttons/btn_5.jpg', hoverImage: '/images/buttons/btn_5_over.jpg', href: '/contact' }
+];
+---
+
+<nav class="flex justify-center items-center space-x-4 py-6 px-4 bg-black bg-opacity-70">
+  <div class="flex items-center">
+    <a href="/" class="mr-8">
+      <img src="/images/general/logo.jpg" alt="Soundmaster Radio" class="h-16">
+    </a>
+    <div class="flex space-x-4">
+      {navItems.map(item => (
+        <a href={item.href} class="transition-transform hover:scale-105">
+          <img
+            src={item.image}
+            alt={item.name}
+            data-hover-image={item.hoverImage}
+            class="h-10 w-auto"
+          >
+        </a>
+      ))}
+    </div>
+  </div>
+  <div class="ml-auto flex items-center space-x-4">
+    <a href="/login" class="text-white hover:text-blue-400 transition-colors">Login</a>
+    <a href="/signup" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Sign Up</a>
+  </div>
+</nav> 

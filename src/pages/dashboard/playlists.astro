@@ -1,0 +1,395 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import AudioPlayer from '../../components/AudioPlayer.astro';
+import { getUser } from '../../middleware/auth';
+
+interface Playlist {
+  id: number;
+  name: string;
+  description: string | null;
+  is_public: boolean;
+  cover_art_url: string | null;
+  user_id: number;
+  creator_name: string;
+  song_count: number;
+  created_at: string;
+}
+
+const user = await getUser(Astro);
+
+// Fetch playlists
+const response = await fetch(`${Astro.url.origin}/api/playlists`);
+const { playlists } = (await response.json()) as { playlists: Playlist[] };
+---
+
+<DashboardLayout title="Playlists">
+  <div class="p-6">
+    <div class="mb-6 flex justify-between items-center">
+      <button
+        id="createPlaylistBtn"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+      >
+        Create New Playlist
+      </button>
+      
+      <div class="flex items-center space-x-4">
+        <select
+          id="sortBy"
+          class="bg-black bg-opacity-50 text-white px-3 py-2 rounded border border-gray-600"
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="name">Name</option>
+          <option value="songs">Number of Songs</option>
+        </select>
+        
+        <label class="flex items-center space-x-2 text-gray-300">
+          <input type="checkbox" id="showPublic" checked>
+          <span>Show Public Playlists</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="playlistsGrid">
+      {playlists.map((playlist) => (
+        <div 
+          class="bg-black bg-opacity-50 rounded-lg overflow-hidden"
+          data-playlist-data
+          data-id={playlist.id}
+          data-name={playlist.name}
+          data-song-count={playlist.song_count}
+          data-created={playlist.created_at}
+          data-public={playlist.is_public}
+        >
+          <div class="aspect-square relative">
+            <img
+              src={playlist.cover_art_url || '/images/general/default-playlist.jpg'}
+              alt={playlist.name}
+              class="w-full h-full object-cover"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-4">
+              <h3 class="text-xl font-semibold text-white mb-1">{playlist.name}</h3>
+              <p class="text-gray-300 text-sm">by {playlist.creator_name}</p>
+            </div>
+          </div>
+          
+          <div class="p-4">
+            {playlist.description && (
+              <p class="text-gray-300 text-sm mb-4">{playlist.description}</p>
+            )}
+            
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-400 text-sm">{playlist.song_count} songs</p>
+                <p class="text-gray-400 text-sm">
+                  {playlist.is_public ? 'Public' : 'Private'}
+                </p>
+              </div>
+              
+              {user?.id === playlist.user_id && (
+                <div class="flex space-x-2">
+                  <button
+                    class="edit-playlist-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+                    data-playlist-id={playlist.id}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="delete-playlist-btn bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                    data-playlist-id={playlist.id}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Create/Edit Playlist Modal -->
+  <div id="playlistModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-gray-900 rounded-lg max-w-md w-full p-6">
+        <h2 id="modalTitle" class="text-2xl font-bold text-white mb-4">Create New Playlist</h2>
+        
+        <form id="playlistForm" class="space-y-4">
+          <input type="hidden" id="playlistId" name="id">
+          
+          <div>
+            <label class="block text-gray-300 mb-2">Name</label>
+            <input 
+              type="text" 
+              name="name"
+              required
+              class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div>
+            <label class="block text-gray-300 mb-2">Description</label>
+            <textarea 
+              name="description"
+              rows="3"
+              class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            ></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-gray-300 mb-2">Cover Image URL</label>
+            <input 
+              type="url" 
+              name="cover_art_url"
+              class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+          </div>
+          
+          <div class="flex items-center">
+            <input 
+              type="checkbox" 
+              name="is_public" 
+              id="isPublic"
+              class="rounded border-gray-600 text-blue-600 focus:ring-blue-500"
+            >
+            <label for="isPublic" class="ml-2 text-gray-300">
+              Make this playlist public
+            </label>
+          </div>
+          
+          <div class="flex justify-end space-x-4 mt-6">
+            <button
+              type="button"
+              id="cancelBtn"
+              class="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+            >
+              Save Playlist
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add audio player at the bottom -->
+  <AudioPlayer />
+</DashboardLayout>
+
+<script>
+  interface APIError {
+    message: string;
+    errors?: Array<{ message: string }>;
+  }
+
+  interface PlaylistData {
+    id: number;
+    name: string;
+    description: string | null;
+    is_public: boolean;
+    cover_art_url: string | null;
+  }
+
+  interface PlaylistResponse {
+    playlist: PlaylistData;
+  }
+
+  // Get DOM elements with proper type assertions
+  const modal = document.getElementById('playlistModal');
+  const form = document.getElementById('playlistForm') as HTMLFormElement;
+  const modalTitle = document.getElementById('modalTitle');
+  const playlistIdInput = document.getElementById('playlistId') as HTMLInputElement;
+  const sortByElement = document.getElementById('sortBy');
+  const showPublicElement = document.getElementById('showPublic');
+  const playlistsGridElement = document.getElementById('playlistsGrid');
+
+  // Type guard for required elements
+  if (!form || !modal || !modalTitle || !playlistIdInput || 
+      !sortByElement || !showPublicElement || !playlistsGridElement) {
+    throw new Error('Required DOM elements not found');
+  }
+
+  // Safe type assertions after null check
+  const sortBy = sortByElement as HTMLSelectElement;
+  const showPublic = showPublicElement as HTMLInputElement;
+  const playlistsGrid = playlistsGridElement;
+  
+  // Show modal
+  document.getElementById('createPlaylistBtn')?.addEventListener('click', () => {
+    modalTitle.textContent = 'Create New Playlist';
+    form.reset();
+    playlistIdInput.value = '';
+    modal.classList.remove('hidden');
+  });
+  
+  // Hide modal
+  document.getElementById('cancelBtn')?.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+  
+  // Handle form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    
+    const playlistId = playlistIdInput.value;
+    const method = playlistId ? 'PUT' : 'POST';
+    const url = playlistId ? `/api/playlists/${playlistId}` : '/api/playlists';
+    
+    try {
+      const response = await fetch(url, {
+        method,
+        body: formData
+      });
+      
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const error = await response.json() as APIError;
+        alert(error.message);
+      }
+    } catch (error) {
+      console.error('Error saving playlist:', error);
+      alert('Failed to save playlist. Please try again.');
+    }
+  });
+  
+  // Edit playlist
+  document.querySelectorAll<HTMLButtonElement>('.edit-playlist-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const playlistId = btn.getAttribute('data-playlist-id');
+      if (!playlistId) return;
+      
+      try {
+        const response = await fetch(`/api/playlists/${playlistId}`);
+        const { playlist } = await response.json() as PlaylistResponse;
+        
+        // Fill form
+        playlistIdInput.value = String(playlist.id);
+        (form.elements.namedItem('name') as HTMLInputElement).value = playlist.name;
+        (form.elements.namedItem('description') as HTMLTextAreaElement).value = playlist.description || '';
+        (form.elements.namedItem('cover_art_url') as HTMLInputElement).value = playlist.cover_art_url || '';
+        (form.elements.namedItem('is_public') as HTMLInputElement).checked = playlist.is_public;
+        
+        modalTitle.textContent = 'Edit Playlist';
+        modal.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error fetching playlist:', error);
+        alert('Failed to load playlist details. Please try again.');
+      }
+    });
+  });
+  
+  // Delete playlist
+  document.querySelectorAll<HTMLButtonElement>('.delete-playlist-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to delete this playlist?')) return;
+      
+      const playlistId = btn.getAttribute('data-playlist-id');
+      if (!playlistId) return;
+      
+      try {
+        const response = await fetch(`/api/playlists/${playlistId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          const error = await response.json() as APIError;
+          alert(error.message);
+        }
+      } catch (error) {
+        console.error('Error deleting playlist:', error);
+        alert('Failed to delete playlist. Please try again.');
+      }
+    });
+  });
+  
+  // Sorting and filtering with proper type safety
+  function updatePlaylists() {
+    const playlists = Array.from(playlistsGrid.children);
+    
+    // Sort playlists
+    playlists.sort((a, b) => {
+      const aElement = a as HTMLElement;
+      const bElement = b as HTMLElement;
+      const aData = aElement.dataset;
+      const bData = bElement.dataset;
+      
+      if (!aData || !bData) return 0;
+      
+      switch (sortBy.value) {
+        case 'name':
+          return (aData.name || '').localeCompare(bData.name || '');
+        case 'songs':
+          return Number(bData.songCount || 0) - Number(aData.songCount || 0);
+        case 'oldest':
+          return new Date(aData.created || '').getTime() - new Date(bData.created || '').getTime();
+        default: // newest
+          return new Date(bData.created || '').getTime() - new Date(aData.created || '').getTime();
+      }
+    });
+    
+    // Filter playlists
+    playlists.forEach(playlist => {
+      const element = playlist as HTMLElement;
+      const isPublic = element.dataset.public === 'true';
+      element.classList.toggle('hidden', !showPublic.checked && isPublic);
+    });
+    
+    // Reorder DOM
+    playlistsGrid.innerHTML = '';
+    playlists.forEach(playlist => playlistsGrid.appendChild(playlist));
+  }
+  
+  sortBy.addEventListener('change', updatePlaylists);
+  showPublic.addEventListener('change', updatePlaylists);
+
+  // Add TypeScript interfaces
+  interface Song {
+    id: number;
+    title: string;
+    artist: string;
+    fileUrl: string;
+    duration: number;
+  }
+
+  interface HTMLElementWithDataset extends HTMLElement {
+    dataset: DOMStringMap;
+  }
+
+  // Initialize song playback
+  function initializeSongPlayback() {
+    const songElements = document.querySelectorAll<HTMLElementWithDataset>('[data-song-id]');
+    songElements.forEach(element => {
+      const playButton = element.querySelector('.play-button');
+      if (!playButton) return;
+
+      playButton.addEventListener('click', async () => {
+        const songId = element.dataset.songId;
+        try {
+          const response = await fetch(`/api/songs/${songId}`);
+          if (!response.ok) throw new Error('Failed to fetch song');
+          
+          const song = await response.json() as Song;
+          (window as any).audioPlayer.playSong(song);
+        } catch (error) {
+          console.error('Error playing song:', error);
+          alert('Failed to play song');
+        }
+      });
+    });
+  }
+
+  // Initialize after content loads
+  document.addEventListener('DOMContentLoaded', initializeSongPlayback);
+  document.addEventListener('playlistContentUpdated', initializeSongPlayback);
+</script> 

@@ -1,0 +1,112 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import { isAuthenticated } from '../middleware/auth';
+
+// Redirect if already logged in
+if (await isAuthenticated(Astro)) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<Layout title="Login">
+  <Navigation />
+  
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white bg-opacity-10 p-8 rounded-lg backdrop-blur-sm">
+      <h1 class="text-2xl font-bold text-white mb-6">Welcome Back</h1>
+      
+      <form class="space-y-6" id="loginForm">
+        <div>
+          <label class="block text-gray-300 mb-2">Email</label>
+          <input 
+            type="email" 
+            name="email"
+            required
+            class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >
+        </div>
+        
+        <div>
+          <label class="block text-gray-300 mb-2">Password</label>
+          <input 
+            type="password" 
+            name="password"
+            required
+            class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input 
+              type="checkbox" 
+              name="remember" 
+              id="remember"
+              class="rounded border-gray-600 text-blue-600 focus:ring-blue-500"
+            >
+            <label for="remember" class="ml-2 text-gray-300">
+              Remember me
+            </label>
+          </div>
+          
+          <a href="/forgot-password" class="text-blue-400 hover:text-blue-300 text-sm">
+            Forgot password?
+          </a>
+        </div>
+        
+        <div id="errorMessage" class="text-red-500 text-sm hidden"></div>
+        
+        <button 
+          type="submit"
+          class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+        >
+          Sign In
+        </button>
+      </form>
+      
+      <p class="text-center text-gray-300 mt-4">
+        Don't have an account? 
+        <a href="/signup" class="text-blue-400 hover:text-blue-300">Sign up</a>
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  interface APIError {
+    message: string;
+    errors?: Array<{ message: string }>;
+  }
+
+  const loginForm = document.getElementById('loginForm') as HTMLFormElement;
+  const errorMessage = document.getElementById('errorMessage');
+
+  if (!loginForm || !errorMessage) {
+    throw new Error('Required DOM elements not found');
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(loginForm);
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        window.location.href = '/dashboard';
+      } else {
+        const error = await response.json() as APIError;
+        errorMessage.textContent = error.message;
+        errorMessage.classList.remove('hidden');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      errorMessage.textContent = 'Failed to login. Please try again.';
+      errorMessage.classList.remove('hidden');
+    }
+  });
+</script> 

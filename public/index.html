@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soundmaster - Your Ultimate Online Radio Station</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url("images/backgrounds/soundmaster_background.jpg");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header, footer {
+            background: rgba(0, 0, 0, 0.8);
+            text-align: center;
+            padding: 1em;
+            width: 100%;
+        }
+        nav {
+            margin-bottom: 2em;
+        }
+        nav a {
+            color: #fff;
+            margin: 0 1em;
+            text-decoration: none;
+            font-weight: bold;
+            background-color: #ff6f61;
+            padding: 0.5em 1em;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        nav a:hover {
+            background-color: #ff4c39;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2em;
+            background: rgba(0, 0, 0, 0.7);
+            margin: 0 1em;
+            border-radius: 10px;
+        }
+        form, .carousel, .event-calendar {
+            margin: 2em 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input, button {
+            padding: 0.5em;
+            margin: 0.5em;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #ff6f61;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #ff4c39;
+        }
+        #results, #uploadResult, #greeting-output, #search-results {
+            margin-top: 1em;
+            text-align: center;
+        }
+        #results, #search-results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .result-item {
+            background-color: #333;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            width: 80%;
+        }
+        audio {
+            margin: 2em 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        #progressBar {
+            width: 100%;
+            background-color: #444;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1em;
+        }
+        #progressBar div {
+            height: 20px;
+            background-color: #00FF00;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .carousel-inner img {
+            width: 100%;
+            height: 100%;
+        }
+        @media (max-width: 600px) {
+            nav {
+                flex-direction: column;
+            }
+            nav a {
+                margin: 0.5em 0;
+            }
+        }
+        .form-label {
+            color: #fff;
+            margin-bottom: 0.5rem;
+            display: block;
+            text-align: left;
+        }
+        
+        .form-text {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        #uploadForm {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Improve progress bar accessibility */
+        #progressBar {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        #progressBar > div {
+            background-color: #28a745;
+            height: 20px;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="images/general/logo.jpg" alt="Soundmaster Radio Logo" class="logo">
+        <nav class="navigation">
+            <img src="images/buttons/btn_1.jpg" alt="Home" data-hover-image="images/buttons/btn_1_over.jpg" class="nav-button">
+            <img src="images/buttons/btn_2.jpg" alt="Shows" data-hover-image="images/buttons/btn_2_over.jpg" class="nav-button">
+            <img src="images/buttons/btn_3.jpg" alt="News" data-hover-image="images/buttons/btn_3_over.jpg" class="nav-button">
+            <img src="images/buttons/btn_4.jpg" alt="About" data-hover-image="images/buttons/btn_4_over.jpg" class="nav-button">
+            <img src="images/buttons/btn_5.jpg" alt="Contact" data-hover-image="images/buttons/btn_5_over.jpg" class="nav-button">
+        </nav>
+    </header>
+    <main>
+        <!-- Welcome Section -->
+        <section id="welcome" class="text-center">
+            <h2>Welcome to Soundmaster</h2>
+            <p>Experience the beats of Tzaneen like never before.</p>
+            <form id="greet-form">
+                <input type="text" id="name-input" class="form-control" placeholder="Enter your name">
+                <button type="submit" class="btn btn-primary">Greet Me</button>
+                <div id="greeting-output"></div>
+            </form>
+        </section>
+
+        <!-- Discover Section -->
+        <section id="discover" class="text-center mt-4">
+            <h2>Discover the Sounds of Tzaneen</h2>
+            <p>Explore a rich collection of music that brings back good times, memories, and feelings. Our AI-driven search lets you find exactly what you want to hear.</p>
+            <form id="search-form">
+                <input type="search" id="search-input" class="form-control" placeholder="Search music, artists, or albums">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <div id="search-results"></div>
+            </form>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="text-center mt-4">
+            <h2>Experience Limpopo Like Never Before</h2>
+            <div id="limpopoCarousel" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                       <img src="/images/h_about.gif" alt="About">
+                    </div>
+                    <div class="carousel-item">
+                      <img src="/images/img_welcome.jpg" alt="Welcome">
+                    </div>
+                    <div class="carousel-item">
+                      <img src="/images/virtual_dj_logo.jpg" alt="Virtual DJ Logo">
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#limpopoCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#limpopoCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Your Music Section -->
+        <section id="your-music" class="text-center mt-4">
+            <h2>Your Music, Your Station</h2>
+            <form id="uploadForm" aria-label="Upload music form">
+                <div class="form-group">
+                    <label for="songFile" class="form-label">Choose an audio file to upload</label>
+                    <input 
+                        type="file" 
+                        id="songFile" 
+                        name="songFile"
+                        class="form-control" 
+                        accept="audio/*"
+                        aria-describedby="songFileHelp"
+                        title="Select an audio file to upload"
+                        required
+                    >
+                    <small id="songFileHelp" class="form-text text-muted">
+                        Supported formats: MP3, WAV, OGG (Max size: 100MB)
+                    </small>
+                </div>
+                <button 
+                    type="submit" 
+                    class="btn btn-primary"
+                    aria-label="Upload selected audio file"
+                >
+                    Upload
+                </button>
+                <div id="uploadResult" role="alert" aria-live="polite"></div>
+                <div class="mt-3">
+                    <label for="audioPlayer" class="form-label">Audio Preview</label>
+                    <audio 
+                        id="audioPlayer" 
+                        controls 
+                        class="w-100"
+                        aria-label="Audio player for uploaded music"
+                    >
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div></div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Join Us Section -->
+        <section id="join-us" class="text-center mt-4">
+            <h2>Join Us at the Heart of Tzaneen’s Entertainment</h2>
+            <div class="event-calendar">
+                <!-- Calendar elements -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Soundmaster. All rights reserved.</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+    <script src="/js/script.js"></script> <!-- Adjusted script path -->
+</body>
+</html>

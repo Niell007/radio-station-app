@@ -1,0 +1,264 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import { getUser } from '../../../middleware/auth';
+
+const user = await getUser(Astro);
+if (!user) {
+  return Astro.redirect('/login');
+}
+---
+
+<DashboardLayout title="Upload Songs">
+  <div class="p-6">
+    <div class="max-w-2xl mx-auto">
+      <div 
+        id="dropZone"
+        class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center mb-6 hover:border-blue-500 transition-colors"
+      >
+        <div class="space-y-4">
+          <div class="text-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+            <p class="text-lg font-semibold">Drag and drop your audio files here</p>
+            <p class="text-sm text-gray-400">or click to select files</p>
+          </div>
+          
+          <input 
+            type="file" 
+            id="fileInput" 
+            class="hidden" 
+            accept="audio/mpeg,audio/mp3,audio/wav" 
+            multiple
+          >
+          
+          <div class="text-sm text-gray-400">
+            <p>Supported formats: MP3, WAV</p>
+            <p>Maximum file size: 20MB</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="uploadQueue" class="space-y-4"></div>
+    </div>
+  </div>
+</DashboardLayout>
+
+<template id="uploadItemTemplate">
+  <div class="bg-black bg-opacity-50 rounded-lg p-4">
+    <div class="flex items-start gap-4">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+          <span class="filename text-white font-medium truncate"></span>
+          <span class="filesize text-sm text-gray-400"></span>
+        </div>
+
+        <div class="space-y-2">
+          <input 
+            type="text" 
+            name="title" 
+            placeholder="Song Title" 
+            required
+            class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >
+          
+          <input 
+            type="text" 
+            name="artist" 
+            placeholder="Artist" 
+            required
+            class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >
+          
+          <input 
+            type="text" 
+            name="genre" 
+            placeholder="Genre (optional)" 
+            class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >
+        </div>
+
+        <div class="mt-4">
+          <div class="progress-bar h-1 w-full bg-gray-700 rounded overflow-hidden">
+            <div class="progress h-full bg-blue-500 transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <div class="flex justify-between items-center mt-1">
+            <span class="status text-sm text-gray-400">Ready to upload</span>
+            <span class="percentage text-sm text-gray-400">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <button 
+        type="button"
+        class="remove-btn text-gray-400 hover:text-red-500 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+  interface UploadItem {
+    file: File;
+    element: HTMLElement;
+    status: HTMLElement;
+    progress: HTMLElement;
+    percentage: HTMLElement;
+    title: HTMLInputElement;
+    artist: HTMLInputElement;
+    genre: HTMLInputElement;
+    removeBtn: HTMLButtonElement;
+  }
+
+  const dropZone = document.getElementById('dropZone')!;
+  const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+  const uploadQueue = document.getElementById('uploadQueue')!;
+  const template = document.getElementById('uploadItemTemplate') as HTMLTemplateElement;
+
+  // Handle drag and drop
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-blue-500');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('border-blue-500');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-blue-500');
+    handleFiles(e.dataTransfer?.files);
+  });
+
+  // Handle click to select
+  dropZone.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', () => {
+    handleFiles(fileInput.files);
+    fileInput.value = ''; // Reset for future selections
+  });
+
+  function handleFiles(files: FileList | null) {
+    if (!files) return;
+
+    Array.from(files)
+      .filter(file => ['audio/mpeg', 'audio/mp3', 'audio/wav'].includes(file.type))
+      .forEach(createUploadItem);
+  }
+
+  function createUploadItem(file: File) {
+    const item = template.content.cloneNode(true) as DocumentFragment;
+    const element = item.firstElementChild as HTMLElement;
+    
+    // Set file info
+    element.querySelector('.filename')!.textContent = file.name;
+    element.querySelector('.filesize')!.textContent = formatFileSize(file.size);
+    
+    // Get elements
+    const status = element.querySelector('.status') as HTMLElement;
+    const progress = element.querySelector('.progress') as HTMLElement;
+    const percentage = element.querySelector('.percentage') as HTMLElement;
+    const title = element.querySelector('[name="title"]') as HTMLInputElement;
+    const artist = element.querySelector('[name="artist"]') as HTMLInputElement;
+    const genre = element.querySelector('[name="genre"]') as HTMLInputElement;
+    const removeBtn = element.querySelector('.remove-btn') as HTMLButtonElement;
+    
+    // Auto-fill title and artist from filename
+    const [artistName, songTitle] = file.name.split(' - ');
+    if (songTitle) {
+      artist.value = artistName;
+      title.value = songTitle.replace(/\.[^/.]+$/, ''); // Remove extension
+    } else {
+      title.value = file.name.replace(/\.[^/.]+$/, '');
+    }
+    
+    // Create upload item object
+    const uploadItem: UploadItem = {
+      file,
+      element,
+      status,
+      progress,
+      percentage,
+      title,
+      artist,
+      genre,
+      removeBtn
+    };
+    
+    // Add remove handler
+    removeBtn.addEventListener('click', () => {
+      element.remove();
+    });
+    
+    // Add form submit handler
+    element.addEventListener('submit', (e) => {
+      e.preventDefault();
+      uploadSong(uploadItem);
+    });
+    
+    uploadQueue.appendChild(element);
+  }
+
+  async function uploadSong(item: UploadItem) {
+    if (!item.title.value || !item.artist.value) {
+      item.status.textContent = 'Please fill in required fields';
+      item.status.classList.add('text-red-500');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', item.file);
+    formData.append('title', item.title.value);
+    formData.append('artist', item.artist.value);
+    if (item.genre.value) {
+      formData.append('genre', item.genre.value);
+    }
+
+    try {
+      item.status.textContent = 'Uploading...';
+      item.status.classList.remove('text-red-500');
+      
+      const response = await fetch('/api/songs/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        item.status.textContent = 'Upload complete';
+        item.progress.style.width = '100%';
+        item.percentage.textContent = '100%';
+        
+        // Remove item after a delay
+        setTimeout(() => {
+          item.element.remove();
+        }, 2000);
+      } else {
+        const error = await response.json();
+        item.status.textContent = error.message || 'Upload failed';
+        item.status.classList.add('text-red-500');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      item.status.textContent = 'Upload failed';
+      item.status.classList.add('text-red-500');
+    }
+  }
+
+  function formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  }
+</script> 

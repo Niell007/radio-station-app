@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  email      String   @unique
+  passwordHash String  @map("password_hash")
+  role       String   @default("user")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  sessions   Session[]
+  shows      Show[]
+  playlists  Playlist[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Show {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  hostId      Int      @map("host_id")
+  startTime   String   @map("start_time")
+  endTime     String   @map("end_time")
+  daysOfWeek  String   @map("days_of_week")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  host        User     @relation(fields: [hostId], references: [id], onDelete: Cascade)
+
+  @@map("shows")
+}
+
+model Song {
+  id          Int      @id @default(autoincrement())
+  title       String
+  artist      String
+  genre       String?
+  fileUrl     String   @map("file_url")
+  duration    Int
+  fileSize    Int      @map("file_size")
+  mimeType    String   @map("mime_type")
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  playlists   PlaylistSong[]
+
+  @@map("songs")
+}
+
+model Playlist {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  userId      Int      @map("user_id")
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songs       PlaylistSong[]
+
+  @@map("playlists")
+}
+
+model PlaylistSong {
+  playlistId  Int      @map("playlist_id")
+  songId      Int      @map("song_id")
+  position    Int
+  addedAt     DateTime @default(now()) @map("added_at")
+
+  // Relations
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song        Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@id([playlistId, songId])
+  @@map("playlist_songs")
+}
+
+model KaraokeFile {
+  id            Int      @id @default(autoincrement())
+  title         String
+  artist        String
+  language      String
+  genre         String?
+  fileUrl       String   @map("file_url")
+  lyricsUrl     String?  @map("lyrics_url")
+  duration      Int
+  fileSize      Int      @map("file_size")
+  mimeType      String   @map("mime_type")
+  searchVector  String?  @map("search_vector")
+  uploadedAt    DateTime @default(now()) @map("uploaded_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("karaoke_files")
+}

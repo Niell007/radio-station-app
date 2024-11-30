@@ -1,0 +1,34 @@
+name = "radio-station-app"
+main = "./dist/server/entry.mjs"
+compatibility_date = "2023-11-21"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+
+[ai]
+binding = "AI"
+
+[[r2_buckets]]
+binding = "MUSIC_STORAGE"
+bucket_name = "music-storage"
+preview_bucket_name = "music-storage-preview"
+
+[[r2_buckets]]
+binding = "COVER_ART_STORAGE"
+bucket_name = "radio-station-covers"
+preview_bucket_name = "radio-station-covers-dev"
+
+[[r2_buckets]]
+binding = "USER_CONTENT_STORAGE"
+bucket_name = "radio-station-user-content"
+preview_bucket_name = "radio-station-user-content-dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "radio_station_db"
+database_id = "radio-station-db"
+preview_database_id = "radio-station-db-preview"
+
+[site]
+bucket = "./dist/client"
