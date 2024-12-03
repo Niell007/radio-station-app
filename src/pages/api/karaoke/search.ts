@@ -44,4 +44,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
             }
         });
     }
-}; 
+};
+
+export const searchKaraokeFiles = async (params: any, db: any) => {
+    const manager = new KaraokeManager(db);
+    const { data: files, total } = await manager.search(params);
+    return { files, total };
+};

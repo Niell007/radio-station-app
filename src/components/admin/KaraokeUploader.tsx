@@ -40,6 +40,17 @@ export default function KaraokeUploader({ onUploadComplete }: KaraokeUploaderPro
         return null;
     };
 
+    const extractMetadata = (file: File) => {
+        const name = file.name.replace(/\.[^/.]+$/, '');
+        const parts = name.split('-').map(p => p.trim());
+        if (parts.length >= 2) {
+            setArtist(parts[0]);
+            setTitle(parts[1]);
+        } else {
+            setTitle(name);
+        }
+    };
+
     const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
         const fileList = event.target.files;
         if (!fileList) return;
@@ -61,18 +72,32 @@ export default function KaraokeUploader({ onUploadComplete }: KaraokeUploaderPro
         setError(null);
         setSuccess(null);
 
-        // Try to extract title and artist from filename
+        // Extract metadata from the first file
         if (selectedFiles[0]) {
-            const name = selectedFiles[0].name.replace(/\.[^/.]+$/, '');
-            const parts = name.split('-').map(p => p.trim());
-            if (parts.length >= 2) {
-                setArtist(parts[0]);
-                setTitle(parts[1]);
-            } else {
-                setTitle(name);
-            }
+            extractMetadata(selectedFiles[0]);
         }
     }, []);
+
+    const handleFileUpload = async (file: File, duration: number) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', title || file.name);
+        formData.append('artist', artist);
+        formData.append('language', language);
+        formData.append('genre', genre);
+        formData.append('difficulty', difficulty);
+        formData.append('is_explicit', String(isExplicit));
+        formData.append('duration', String(duration));
+
+        const response = await fetch('/api/admin/karaoke/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to upload ${file.name}`);
+        }
+    };
 
     const handleSubmit = useCallback(async (event: React.FormEvent) => {
         event.preventDefault();
@@ -92,24 +117,7 @@ export default function KaraokeUploader({ onUploadComplete }: KaraokeUploaderPro
 
             // Upload each file
             for (const { file, duration } of processedFiles) {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('title', title || file.name);
-                formData.append('artist', artist);
-                formData.append('language', language);
-                formData.append('genre', genre);
-                formData.append('difficulty', difficulty);
-                formData.append('is_explicit', String(isExplicit));
-                formData.append('duration', String(duration));
-
-                const response = await fetch('/api/admin/karaoke/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to upload ${file.name}`);
-                }
+                await handleFileUpload(file, duration);
             }
 
             setSuccess('Files uploaded successfully');
@@ -263,4 +271,4 @@ export default function KaraokeUploader({ onUploadComplete }: KaraokeUploaderPro
             </Button>
         </form>
     );
-} 
+}

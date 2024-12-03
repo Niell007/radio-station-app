@@ -94,4 +94,4 @@ export function requireAuth(roles?: string[]) {
     (context.request as AuthenticatedRequest).user = user;
     return null;
   };
-} 
+}

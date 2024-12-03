@@ -38,47 +38,49 @@ function createJWT(payload: any, secret: string): string {
     return `${base64Header}.${base64Payload}.${signature}`;
 }
 
+async function loginUser(email: string, password: string, db: any, secret: string) {
+    // Get user from database
+    const user = await db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .bind(email)
+        .first<DBUser>();
+
+    if (!user) {
+        throw new Error('Invalid email or password');
+    }
+
+    // Verify password
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) {
+        throw new Error('Invalid email or password');
+    }
+
+    // Generate session token
+    const token = createJWT(
+        { sub: user.id.toString(), role: user.role },
+        secret
+    );
+
+    // Create session in database
+    const sessionId = crypto.randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 1);
+
+    await db
+        .prepare('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)')
+        .bind(sessionId, user.id, expiresAt.toISOString())
+        .run();
+
+    return { token, user };
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
     try {
         const data = await request.json();
         // Validate and parse the request data
         const { email, password } = loginSchema.parse(data);
 
-        // Get user from database
-        const user = await locals.runtime.env.DB
-            .prepare('SELECT * FROM users WHERE email = ?')
-            .bind(email)
-            .first<DBUser>();
-
-        if (!user) {
-            return new Response(JSON.stringify({
-                error: 'Invalid email or password'
-            }), { status: 401 });
-        }
-
-        // Verify password
-        const isValid = await bcrypt.compare(password, user.password_hash);
-        if (!isValid) {
-            return new Response(JSON.stringify({
-                error: 'Invalid email or password'
-            }), { status: 401 });
-        }
-
-        // Generate session token
-        const token = createJWT(
-            { sub: user.id.toString(), role: user.role },
-            process.env.SESSION_SECRET || 'your-secret-key'
-        );
-
-        // Create session in database
-        const sessionId = crypto.randomUUID();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 1);
-
-        await locals.runtime.env.DB
-            .prepare('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)')
-            .bind(sessionId, user.id, expiresAt.toISOString())
-            .run();
+        const { token, user } = await loginUser(email, password, locals.runtime.env.DB, process.env.SESSION_SECRET || 'your-secret-key');
 
         return new Response(JSON.stringify({
             token,
@@ -105,4 +107,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
             error: 'Internal server error'
         }), { status: 500 });
     }
-}; 
+};

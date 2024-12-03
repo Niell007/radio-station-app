@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Pagination, Checkbox, Badge } from 'flowbite-react';
 import { TrashIcon, PencilIcon, PlayIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
@@ -31,6 +31,24 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [karaokeFiles, setKaraokeFiles] = useState<KaraokeFile[]>(files);
+
+  useEffect(() => {
+    setKaraokeFiles(files);
+  }, [files]);
+
+  const fetchKaraokeFiles = async () => {
+    try {
+      const response = await fetch('/api/admin/karaoke');
+      if (!response.ok) {
+        throw new Error('Failed to fetch karaoke files');
+      }
+      const data = await response.json();
+      setKaraokeFiles(data.files);
+    } catch (error) {
+      console.error('Error fetching karaoke files:', error);
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
@@ -44,7 +62,7 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
         throw new Error('Failed to delete file');
       }
 
-      window.location.reload();
+      await fetchKaraokeFiles();
     } catch (error) {
       console.error('Error deleting file:', error);
       alert('Failed to delete file');
@@ -61,7 +79,7 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
           fetch(`/api/admin/karaoke/${id}`, { method: 'DELETE' })
         )
       );
-      window.location.reload();
+      await fetchKaraokeFiles();
     } catch (error) {
       console.error('Error deleting files:', error);
       alert('Failed to delete some files');
@@ -73,10 +91,27 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
     setShowEditModal(true);
   };
 
-  const handleEditSave = () => {
-    setShowEditModal(false);
-    setEditingFile(null);
-    window.location.reload();
+  const handleEditSave = async (updatedFile: KaraokeFile) => {
+    try {
+      const response = await fetch(`/api/admin/karaoke/${updatedFile.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedFile)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update file');
+      }
+
+      await fetchKaraokeFiles();
+      setShowEditModal(false);
+      setEditingFile(null);
+    } catch (error) {
+      console.error('Error updating file:', error);
+      alert('Failed to update file');
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -106,7 +141,7 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
 
   const toggleAllFiles = () => {
     setSelectedFiles(prev =>
-      prev.length === files.length ? [] : files.map(f => f.id)
+      prev.length === karaokeFiles.length ? [] : karaokeFiles.map(f => f.id)
     );
   };
 
@@ -127,7 +162,7 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
         <Table.Head>
           <Table.HeadCell className="w-4 p-4">
             <Checkbox
-              checked={selectedFiles.length === files.length}
+              checked={selectedFiles.length === karaokeFiles.length}
               onChange={toggleAllFiles}
             />
           </Table.HeadCell>
@@ -139,7 +174,7 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
           <Table.HeadCell>Actions</Table.HeadCell>
         </Table.Head>
         <Table.Body>
-          {files.map((file) => (
+          {karaokeFiles.map((file) => (
             <Table.Row key={file.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
               <Table.Cell className="w-4 p-4">
                 <Checkbox
@@ -242,4 +277,4 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
       )}
     </div>
   );
-} 
+}
