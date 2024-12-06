@@ -83,4 +83,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
             error: 'Failed to upload karaoke file'
         }), { status: 500 });
     }
-};
+}; 
