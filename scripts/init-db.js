@@ -18,4 +18,8 @@ execSync(`echo "${schema}" | npx wrangler d1 execute radio-station-db --local`, 
   stdio: 'inherit',
 });
 
-console.log('Database initialization complete!'); 
+// Create KV namespace
+console.log('Creating KV namespace...');
+execSync('npx wrangler kv:namespace create "YOUR_NAMESPACE_NAME"', { stdio: 'inherit' });
+
+console.log('Database and KV namespace initialization complete!');
