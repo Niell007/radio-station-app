@@ -11,6 +11,7 @@ declare module 'astro' {
         DB: D1Database;
         BUCKET: R2Bucket;
         AI: any;
+        YOUR_NAMESPACE_BINDING: KVNamespace;
       };
     };
   }
@@ -29,22 +30,19 @@ export interface AuthenticatedRequest extends Request {
 
 // Middleware handler
 export const onRequest: MiddlewareHandler = async ({ cookies, locals, request }, next) => {
-  locals.user = await authenticateUser(cookies);
+  locals.user = await authenticateUser(cookies, locals.runtime.env.YOUR_NAMESPACE_BINDING);
   return next();
 };
 
 // Helper function to authenticate user from session
-export async function authenticateUser(cookies: AstroCookies): Promise<AuthenticatedUser | null> {
+export async function authenticateUser(cookies: AstroCookies, kvNamespace: KVNamespace): Promise<AuthenticatedUser | null> {
   const sessionId = cookies.get('session')?.value;
   if (!sessionId) return null;
 
   try {
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { user: true }
-    });
+    const session = await kvNamespace.get(sessionId, { type: 'json' });
 
-    if (!session || session.expiresAt < new Date()) {
+    if (!session || session.expiresAt < new Date().toISOString()) {
       cookies.delete('session', { path: '/' });
       return null;
     }
@@ -62,20 +60,20 @@ export async function authenticateUser(cookies: AstroCookies): Promise<Authentic
 }
 
 // Helper function to check if user is authenticated
-export async function isAuthenticated(context: { cookies: AstroCookies }): Promise<boolean> {
-  const user = await authenticateUser(context.cookies);
+export async function isAuthenticated(context: { cookies: AstroCookies; locals: { runtime: { env: { YOUR_NAMESPACE_BINDING: KVNamespace } } } }): Promise<boolean> {
+  const user = await authenticateUser(context.cookies, context.locals.runtime.env.YOUR_NAMESPACE_BINDING);
   return user !== null;
 }
 
 // Helper function to get user
-export async function getUser(context: { cookies: AstroCookies }): Promise<AuthenticatedUser | null> {
-  return authenticateUser(context.cookies);
+export async function getUser(context: { cookies: AstroCookies; locals: { runtime: { env: { YOUR_NAMESPACE_BINDING: KVNamespace } } } }): Promise<AuthenticatedUser | null> {
+  return authenticateUser(context.cookies, context.locals.runtime.env.YOUR_NAMESPACE_BINDING);
 }
 
 // Middleware to require authentication
 export function requireAuth(roles?: string[]) {
-  return async (context: { cookies: AstroCookies; request: Request }) => {
-    const user = await authenticateUser(context.cookies);
+  return async (context: { cookies: AstroCookies; request: Request; locals: { runtime: { env: { YOUR_NAMESPACE_BINDING: KVNamespace } } } }) => {
+    const user = await authenticateUser(context.cookies, context.locals.runtime.env.YOUR_NAMESPACE_BINDING);
     
     if (!user) {
       return new Response(

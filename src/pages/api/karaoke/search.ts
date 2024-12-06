@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { KaraokeManager } from '../../../lib/karaoke';
 import { z } from 'zod';
+import { AI } from '@cloudflare/ai';
 
 const searchParamsSchema = z.object({
     query: z.string().optional(),
@@ -15,9 +16,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const data = await request.json();
         const params = searchParamsSchema.parse(data);
 
+        // Use Workers AI for NLP search
+        const ai = new AI(locals.runtime.env.AI);
+        const nlpQuery = await ai.nlp(params.query || '');
+
         const manager = new KaraokeManager(locals.runtime.env.DB);
         const { data: files, total } = await manager.search({
-            query: params.query,
+            query: nlpQuery,
             language: params.language,
             genre: params.genre,
             per_page: params.limit,

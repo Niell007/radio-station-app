@@ -30,6 +30,11 @@ database_name = "radio_station_db"
 database_id = "radio-station-db"
 preview_database_id = "radio-station-db-preview"
 
+[[kv_namespaces]]
+binding = "YOUR_NAMESPACE_BINDING"
+id = "YOUR_NAMESPACE_ID"
+preview_id = "YOUR_NAMESPACE_PREVIEW_ID"
+
 [site]
 bucket = "./dist/client"
 
