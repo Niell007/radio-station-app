@@ -9,7 +9,9 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/solid';
 
-export function Sidebar() {
+interface SidebarProps {}
+
+export function Sidebar({}: SidebarProps) {
   return (
     <FlowbiteSidebar aria-label="Admin sidebar" className="fixed left-0 top-0 z-20 h-full pt-16 flex lg:flex flex-shrink-0 flex-col w-64 transition-width duration-75">
       <FlowbiteSidebar.Items>
@@ -36,4 +38,4 @@ export function Sidebar() {
       </FlowbiteSidebar.Items>
     </FlowbiteSidebar>
   );
-} 
+}

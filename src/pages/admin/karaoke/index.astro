@@ -1,5 +1,13 @@
+---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props as Props;
+---
 
 <AdminLayout title="Karaoke Management">
     <h1>Karaoke Management</h1>
-</AdminLayout> 
+</AdminLayout>

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { KaraokeManager } from '../../../../lib/karaoke';
+import { KaraokeManager, KaraokeError } from '../../../../lib/karaoke';
 import { getAudioDuration } from '../../../../utils/audio';
 
 // File validation constants
@@ -79,8 +79,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
         }), { status: 200 });
     } catch (error) {
         console.error('Error uploading karaoke file:', error);
+        if (error instanceof KaraokeError) {
+            return new Response(JSON.stringify({
+                error: error.message
+            }), { status: 400 });
+        }
         return new Response(JSON.stringify({
             error: 'Failed to upload karaoke file'
         }), { status: 500 });
     }
-}; 
+};
