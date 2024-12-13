@@ -56,3 +56,12 @@ serve_stale = true
 for = "/assets/*"
 [headers.values]
 Cache-Control = "public, max-age=31536000, immutable"
+
+[monitoring]
+enabled = true
+service = "cloudflare"
+alert_channel = "slack"
+
+[rollback]
+enabled = true
+strategy = "automated"

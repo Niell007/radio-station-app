@@ -17,7 +17,9 @@ export default defineConfig({
   vite: {
     build: {
       target: 'esnext',
-      minify: 'esbuild'
+      minify: 'esbuild',
+      artifacts: 'dist/artifacts',
+      parallel: true
     },
     ssr: {
       noExternal: ['@heroicons/*', 'flowbite-react', 'jose']
@@ -29,4 +31,4 @@ export default defineConfig({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
     }
   }
-}); 
+});

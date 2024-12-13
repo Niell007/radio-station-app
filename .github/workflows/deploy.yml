@@ -23,6 +23,14 @@ jobs:
           node-version: '20.11.1'
           cache: 'npm'
 
+      - name: Cache Build Artifacts
+        uses: actions/cache@v2
+        with:
+          path: dist/artifacts
+          key: ${{ runner.os }}-build-artifacts-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-artifacts-
+
       - name: Install Dependencies
         run: npm ci
 
@@ -45,4 +53,11 @@ jobs:
           projectName: radio-station-app
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref || github.ref_name }} 
+          branch: ${{ github.head_ref || github.ref_name }}
+
+      - name: Monitor Deployment
+        run: npm run monitor:deploy
+
+      - name: Rollback on Failure
+        if: failure()
+        run: npm run deploy:rollback
