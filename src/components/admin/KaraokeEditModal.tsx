@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Label, TextInput, Select } from 'flowbite-react';
+import { Modal, Button, Label, TextInput, Select, Spinner } from 'flowbite-react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 interface KaraokeFile {
   id: number;
@@ -24,19 +26,66 @@ interface KaraokeEditModalProps {
   onSave: () => void;
 }
 
+const validationSchema = Yup.object({
+  title: Yup.string().required('Title is required'),
+  artist: Yup.string().required('Artist is required'),
+  language: Yup.string().required('Language is required'),
+  genre: Yup.string(),
+  difficulty: Yup.number().min(1).max(5),
+  isExplicit: Yup.boolean()
+});
+
 export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditModalProps) {
-  const [formData, setFormData] = useState({
-    title: '',
-    artist: '',
-    language: '',
-    genre: '',
-    difficulty: '',
-    isExplicit: false
+  const [loading, setLoading] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      title: '',
+      artist: '',
+      language: '',
+      genre: '',
+      difficulty: '',
+      isExplicit: false
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      if (!file) return;
+
+      setLoading(true);
+
+      try {
+        const response = await fetch(`/api/admin/karaoke/${file.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: values.title,
+            artist: values.artist,
+            language: values.language,
+            genre: values.genre || null,
+            difficulty: values.difficulty ? parseInt(values.difficulty) : null,
+            isExplicit: values.isExplicit
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update file');
+        }
+
+        onSave();
+      } catch (error) {
+        console.error('Error updating file:', error);
+        alert('Failed to update file');
+      } finally {
+        setLoading(false);
+      }
+    }
   });
 
   useEffect(() => {
     if (file) {
-      setFormData({
+      formik.setValues({
         title: file.title,
         artist: file.artist,
         language: file.language,
@@ -47,41 +96,10 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
     }
   }, [file]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
-
-    try {
-      const response = await fetch(`/api/admin/karaoke/${file.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          artist: formData.artist,
-          language: formData.language,
-          genre: formData.genre || null,
-          difficulty: formData.difficulty ? parseInt(formData.difficulty) : null,
-          isExplicit: formData.isExplicit
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update file');
-      }
-
-      onSave();
-    } catch (error) {
-      console.error('Error updating file:', error);
-      alert('Failed to update file');
-    }
-  };
-
   return (
     <Modal show={show} onClose={onClose}>
       <Modal.Header>Edit Karaoke File</Modal.Header>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={formik.handleSubmit}>
         <Modal.Body>
           <div className="space-y-4">
             <div>
@@ -90,10 +108,15 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <TextInput
                 id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                name="title"
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 required
               />
+              {formik.touched.title && formik.errors.title ? (
+                <div className="text-red-500 text-sm">{formik.errors.title}</div>
+              ) : null}
             </div>
 
             <div>
@@ -102,10 +125,15 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <TextInput
                 id="artist"
-                value={formData.artist}
-                onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
+                name="artist"
+                value={formik.values.artist}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 required
               />
+              {formik.touched.artist && formik.errors.artist ? (
+                <div className="text-red-500 text-sm">{formik.errors.artist}</div>
+              ) : null}
             </div>
 
             <div>
@@ -114,8 +142,10 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <Select
                 id="language"
-                value={formData.language}
-                onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                name="language"
+                value={formik.values.language}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 required
               >
                 <option value="">Select language</option>
@@ -129,6 +159,9 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
                 <option value="ko">Korean</option>
                 <option value="zh">Chinese</option>
               </Select>
+              {formik.touched.language && formik.errors.language ? (
+                <div className="text-red-500 text-sm">{formik.errors.language}</div>
+              ) : null}
             </div>
 
             <div>
@@ -137,9 +170,10 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <Select
                 id="genre"
-                value={formData.genre}
-                onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                required
+                name="genre"
+                value={formik.values.genre}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
               >
                 <option value="">Select genre</option>
                 <option value="pop">Pop</option>
@@ -151,6 +185,9 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
                 <option value="classical">Classical</option>
                 <option value="electronic">Electronic</option>
               </Select>
+              {formik.touched.genre && formik.errors.genre ? (
+                <div className="text-red-500 text-sm">{formik.errors.genre}</div>
+              ) : null}
             </div>
 
             <div>
@@ -159,8 +196,10 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </div>
               <Select
                 id="difficulty"
-                value={formData.difficulty}
-                onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                name="difficulty"
+                value={formik.values.difficulty}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
               >
                 <option value="">Select difficulty</option>
                 <option value="1">1 - Beginner</option>
@@ -169,11 +208,16 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
                 <option value="4">4 - Hard</option>
                 <option value="5">5 - Expert</option>
               </Select>
+              {formik.touched.difficulty && formik.errors.difficulty ? (
+                <div className="text-red-500 text-sm">{formik.errors.difficulty}</div>
+              ) : null}
             </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? <Spinner size="sm" /> : 'Save Changes'}
+          </Button>
           <Button color="gray" onClick={onClose}>
             Cancel
           </Button>
@@ -181,4 +225,4 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
       </form>
     </Modal>
   );
-} 
+}

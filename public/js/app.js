@@ -1,4 +1,24 @@
 class RadioPlayer {
+    audio: HTMLAudioElement;
+    currentSong: any;
+    playlist: any[];
+    isPlaying: boolean;
+    currentTab: string;
+    playerElement: HTMLElement | null;
+    playButton: HTMLElement | null;
+    prevButton: HTMLElement | null;
+    nextButton: HTMLElement | null;
+    progressBar: HTMLElement | null;
+    currentArt: HTMLImageElement | null;
+    currentTitle: HTMLElement | null;
+    currentArtist: HTMLElement | null;
+    volumeControl: HTMLInputElement | null;
+    tabButtons: NodeListOf<HTMLElement>;
+    contentPanels: { [key: string]: HTMLElement | null };
+    loginBtn: HTMLElement | null;
+    loginModal: HTMLElement | null;
+    loginForm: HTMLFormElement | null;
+
     constructor() {
         this.audio = new Audio();
         this.currentSong = null;
@@ -17,10 +37,10 @@ class RadioPlayer {
         this.prevButton = document.getElementById('prevBtn');
         this.nextButton = document.getElementById('nextBtn');
         this.progressBar = document.getElementById('progress');
-        this.currentArt = document.getElementById('currentArt');
+        this.currentArt = document.getElementById('currentArt') as HTMLImageElement;
         this.currentTitle = document.getElementById('currentTitle');
         this.currentArtist = document.getElementById('currentArtist');
-        this.volumeControl = document.getElementById('volumeControl');
+        this.volumeControl = document.getElementById('volumeControl') as HTMLInputElement;
 
         // Tab elements
         this.tabButtons = document.querySelectorAll('[role="tab"]');
@@ -33,7 +53,7 @@ class RadioPlayer {
         // Modal elements
         this.loginBtn = document.getElementById('loginBtn');
         this.loginModal = document.getElementById('loginModal');
-        this.loginForm = document.getElementById('loginForm');
+        this.loginForm = document.getElementById('loginForm') as HTMLFormElement;
 
         // Initialize volume control
         if (this.volumeControl) {
@@ -43,14 +63,14 @@ class RadioPlayer {
 
     setupEventListeners() {
         // Player controls
-        this.playButton.addEventListener('click', () => this.togglePlay());
-        this.prevButton.addEventListener('click', () => this.playPrevious());
-        this.nextButton.addEventListener('click', () => this.playNext());
+        this.playButton?.addEventListener('click', () => this.togglePlay());
+        this.prevButton?.addEventListener('click', () => this.playPrevious());
+        this.nextButton?.addEventListener('click', () => this.playNext());
         
         // Volume control
         if (this.volumeControl) {
             this.volumeControl.addEventListener('input', (e) => {
-                this.audio.volume = Number(e.target.value) / 100;
+                this.audio.volume = Number((e.target as HTMLInputElement).value) / 100;
             });
         }
 
@@ -64,11 +84,11 @@ class RadioPlayer {
         this.audio.addEventListener('ended', () => this.playNext());
 
         // Modal events
-        this.loginBtn.addEventListener('click', () => this.showLoginModal());
-        this.loginModal.addEventListener('click', (e) => {
+        this.loginBtn?.addEventListener('click', () => this.showLoginModal());
+        this.loginModal?.addEventListener('click', (e) => {
             if (e.target === this.loginModal) this.hideLoginModal();
         });
-        this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        this.loginForm?.addEventListener('submit', (e) => this.handleLogin(e));
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
@@ -77,8 +97,8 @@ class RadioPlayer {
         this.loadContent('songs');
     }
 
-    handleKeyboardShortcuts(e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    handleKeyboardShortcuts(e: KeyboardEvent) {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
         switch(e.key.toLowerCase()) {
             case ' ':
@@ -116,7 +136,7 @@ class RadioPlayer {
                 break;
             case '/':
                 e.preventDefault();
-                document.getElementById('searchInput').focus();
+                (document.getElementById('searchInput') as HTMLInputElement).focus();
                 break;
             case '1':
             case '2':
@@ -125,13 +145,13 @@ class RadioPlayer {
                 const index = parseInt(e.key) - 1;
                 if (index >= 0 && index < tabs.length) {
                     const tab = document.querySelector(`[data-tab="${tabs[index]}"]`);
-                    if (tab) this.switchTab(tab);
+                    if (tab) this.switchTab(tab as HTMLElement);
                 }
                 break;
         }
     }
 
-    adjustVolume(delta) {
+    adjustVolume(delta: number) {
         if (!this.volumeControl) return;
         const newVolume = Math.max(0, Math.min(1, this.audio.volume + delta));
         this.audio.volume = newVolume;
@@ -142,7 +162,7 @@ class RadioPlayer {
         const modal = document.getElementById('createPlaylistModal');
         if (modal) {
             modal.classList.remove('hidden');
-            document.getElementById('playlistName').focus();
+            (document.getElementById('playlistName') as HTMLInputElement).focus();
         }
     }
 
@@ -150,7 +170,7 @@ class RadioPlayer {
         const modal = document.getElementById('createPlaylistModal');
         if (modal) {
             modal.classList.add('hidden');
-            document.getElementById('createPlaylistForm').reset();
+            (document.getElementById('createPlaylistForm') as HTMLFormElement).reset();
         }
     }
 
@@ -196,7 +216,7 @@ class RadioPlayer {
         }
     }
 
-    showNotification(message, type = 'success') {
+    showNotification(message: string, type: 'success' | 'error' = 'success') {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `fixed bottom-4 left-4 px-4 py-2 rounded ${
@@ -214,7 +234,7 @@ class RadioPlayer {
         }, 3000);
     }
 
-    async handleSearch(query) {
+    async handleSearch(query: string) {
         if (!query) return;
 
         try {
@@ -225,7 +245,7 @@ class RadioPlayer {
             this.renderSongs(results.songs || []);
             
             // Update URL without reload
-            const url = new URL(window.location);
+            const url = new URL(window.location.href);
             url.searchParams.set('q', query);
             window.history.pushState({}, '', url);
         } catch (error) {
@@ -234,7 +254,7 @@ class RadioPlayer {
         }
     }
 
-    async switchTab(selectedTab) {
+    async switchTab(selectedTab: HTMLElement) {
         const tabId = selectedTab.getAttribute('data-tab');
         
         // Update tab button states
@@ -247,10 +267,10 @@ class RadioPlayer {
         });
 
         // Load and show content
-        await this.loadContent(tabId);
+        await this.loadContent(tabId!);
     }
 
-    async loadContent(tabId) {
+    async loadContent(tabId: string) {
         try {
             let content;
             switch(tabId) {
@@ -322,7 +342,7 @@ class RadioPlayer {
         }
     }
 
-    renderSongs(songs) {
+    renderSongs(songs: any[]) {
         if (!this.contentPanels.songs) return;
         
         this.contentPanels.songs.innerHTML = songs.map(song => `
@@ -350,7 +370,7 @@ class RadioPlayer {
         `).join('');
     }
 
-    renderPlaylists(playlists) {
+    renderPlaylists(playlists: any[]) {
         if (!this.contentPanels.playlists) return;
 
         this.contentPanels.playlists.innerHTML = playlists.map(playlist => `
@@ -366,7 +386,7 @@ class RadioPlayer {
         `).join('');
     }
 
-    renderFavorites(favorites) {
+    renderFavorites(favorites: any[]) {
         if (!this.contentPanels.favorites) return;
 
         this.contentPanels.favorites.innerHTML = favorites.map(song => `
@@ -394,14 +414,14 @@ class RadioPlayer {
         `).join('');
     }
 
-    formatDuration(seconds) {
+    formatDuration(seconds: number) {
         if (!seconds) return '0:00';
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    playSong(song) {
+    playSong(song: any) {
         this.currentSong = song;
         this.audio.src = `/api/songs/${song.id}/stream`;
         this.audio.play();
@@ -432,14 +452,14 @@ class RadioPlayer {
     updateProgress() {
         if (!this.audio.duration) return;
         const progress = (this.audio.currentTime / this.audio.duration) * 100;
-        this.progressBar.style.width = `${progress}%`;
+        this.progressBar!.style.width = `${progress}%`;
     }
 
     updatePlayerUI() {
         if (this.currentSong) {
-            this.currentTitle.textContent = this.currentSong.title;
-            this.currentArtist.textContent = this.currentSong.artist;
-            this.currentArt.src = this.currentSong.cover_art_url || '/assets/default-cover.png';
+            this.currentTitle!.textContent = this.currentSong.title;
+            this.currentArtist!.textContent = this.currentSong.artist;
+            this.currentArt!.src = this.currentSong.cover_art_url || '/assets/default-cover.png';
         }
 
         // Update play button icon based on state
@@ -447,16 +467,16 @@ class RadioPlayer {
     }
 
     showLoginModal() {
-        this.loginModal.classList.remove('hidden');
+        this.loginModal?.classList.remove('hidden');
     }
 
     hideLoginModal() {
-        this.loginModal.classList.add('hidden');
+        this.loginModal?.classList.add('hidden');
     }
 
-    async handleLogin(event) {
+    async handleLogin(event: Event) {
         event.preventDefault();
-        const formData = new FormData(event.target);
+        const formData = new FormData(event.target as HTMLFormElement);
         const email = formData.get('email');
         const password = formData.get('password');
 
@@ -484,7 +504,7 @@ class RadioPlayer {
         }
     }
 
-    showError(message) {
+    showError(message: string) {
         // Implement error toast/notification
         console.error(message);
     }
@@ -492,10 +512,10 @@ class RadioPlayer {
     toggleMute() {
         this.audio.muted = !this.audio.muted;
         if (this.volumeControl) {
-            this.volumeControl.value = this.audio.muted ? 0 : (this.audio.volume * 100);
+            this.volumeControl.value = this.audio.muted ? '0' : (this.audio.volume * 100).toString();
         }
     }
 }
 
 // Initialize the player
-const player = new RadioPlayer(); 
+const player = new RadioPlayer();

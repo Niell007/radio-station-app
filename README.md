@@ -10,6 +10,7 @@ A modern web application for managing a radio station, built with Astro and depl
 - 👥 User Authentication
 - 📊 Admin Dashboard
 - 🎶 Playlist Management
+- 🔍 AI-driven Search Functionality
 
 ## Tech Stack
 
