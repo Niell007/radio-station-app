@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { requireAuth, type AuthenticatedRequest } from '../../../middleware/auth';
 import { z } from 'zod';
+import { prisma } from '../../../lib/prisma';
 
 interface Playlist {
   id: number;
@@ -103,4 +104,4 @@ export const POST: APIRoute = async (context) => {
       { status: 500 }
     );
   }
-}; 
+};

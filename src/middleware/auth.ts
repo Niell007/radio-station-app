@@ -11,6 +11,7 @@ declare module 'astro' {
         DB: D1Database;
         BUCKET: R2Bucket;
         AI: any;
+        DATABASE_URL: string;
       };
     };
   }

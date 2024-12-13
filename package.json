@@ -30,7 +30,9 @@
     "deploy:preview": "npm run build && wrangler pages deploy dist --branch=$CF_PAGES_BRANCH",
     "deploy:production": "npm run build && wrangler pages deploy dist --branch=main --production",
     "check": "npm run type-check && npm run lint",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "deploy:rollback": "wrangler rollback",
+    "monitor:deploy": "wrangler monitor"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^11.2.0",
