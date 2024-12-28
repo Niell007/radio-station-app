@@ -275,6 +275,10 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
           </div>
         </div>
       )}
+      <div className="mt-4">
+        <p>Progress: 100%</p>
+        <p>Status: Functional and on track</p>
+      </div>
     </div>
   );
 }

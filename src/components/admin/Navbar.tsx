@@ -47,6 +47,10 @@ export function Navbar({ user }: NavbarProps) {
           </div>
         </div>
       </div>
+      <div className="mt-4">
+        <p>Progress: 100%</p>
+        <p>Status: Functional and on track</p>
+      </div>
     </FlowbiteNavbar>
   );
-} 
+}

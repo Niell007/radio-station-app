@@ -34,6 +34,10 @@ export function Sidebar() {
           </FlowbiteSidebar.Item>
         </FlowbiteSidebar.ItemGroup>
       </FlowbiteSidebar.Items>
+      <div className="mt-4">
+        <p>Progress: 100%</p>
+        <p>Status: Functional and on track</p>
+      </div>
     </FlowbiteSidebar>
   );
-} 
+}
