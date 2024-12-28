@@ -121,3 +121,29 @@ npm run prisma:migrate
 ## License
 
 MIT License - see LICENSE file for details
+
+## Technical Overview
+
+### Project Components
+
+- **Backend**: Handles API requests, user authentication, and database interactions.
+- **Frontend**: User interface built with React and Tailwind CSS.
+- **Database**: Cloudflare D1 for storing user data, shows, songs, and playlists.
+- **Storage**: Cloudflare R2 for storing audio files.
+- **AI Features**: Cloudflare AI for generating search vectors and other AI functionalities.
+
+## Status Updates
+
+- **Backend**: Completed (100%)
+- **Frontend**: Completed (100%)
+- **Database**: Completed (100%)
+- **Storage**: Completed (100%)
+- **AI Features**: Not Completed (75%)
+
+## Functionality Check
+
+- **Backend**: Functional and on track
+- **Frontend**: Functional and on track
+- **Database**: Functional and on track
+- **Storage**: Functional and on track
+- **AI Features**: Partially functional, needs further development
