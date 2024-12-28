@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Label, TextInput, Select } from 'flowbite-react';
+import { Modal, Button, Label, TextInput, Select, Progress } from 'flowbite-react';
 
 interface KaraokeFile {
   id: number;
@@ -34,6 +34,9 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
     isExplicit: false
   });
 
+  const [progress, setProgress] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     if (file) {
       setFormData({
@@ -50,6 +53,9 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
+
+    setIsSaving(true);
+    setProgress(0);
 
     try {
       const response = await fetch(`/api/admin/karaoke/${file.id}`, {
@@ -75,6 +81,9 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
     } catch (error) {
       console.error('Error updating file:', error);
       alert('Failed to update file');
+    } finally {
+      setIsSaving(false);
+      setProgress(100);
     }
   };
 
@@ -171,14 +180,17 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
               </Select>
             </div>
           </div>
+          {isSaving && <Progress value={progress} />}
         </Modal.Body>
         <Modal.Footer>
-          <Button type="submit">Save Changes</Button>
-          <Button color="gray" onClick={onClose}>
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+          <Button color="gray" onClick={onClose} disabled={isSaving}>
             Cancel
           </Button>
         </Modal.Footer>
       </form>
     </Modal>
   );
-} 
+}

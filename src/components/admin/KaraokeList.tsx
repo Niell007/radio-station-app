@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Pagination, Checkbox, Badge } from 'flowbite-react';
+import { Table, Button, Pagination, Checkbox, Badge, Progress } from 'flowbite-react';
 import { TrashIcon, PencilIcon, PlayIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
 import { KaraokeEditModal } from './KaraokeEditModal';
@@ -32,6 +32,8 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
   const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [karaokeFiles, setKaraokeFiles] = useState<KaraokeFile[]>(files);
+  const [progress, setProgress] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     setKaraokeFiles(files);
@@ -53,6 +55,9 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
 
+    setIsDeleting(true);
+    setProgress(0);
+
     try {
       const response = await fetch(`/api/admin/karaoke/${id}`, {
         method: 'DELETE'
@@ -66,12 +71,18 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
     } catch (error) {
       console.error('Error deleting file:', error);
       alert('Failed to delete file');
+    } finally {
+      setIsDeleting(false);
+      setProgress(100);
     }
   };
 
   const handleBatchDelete = async () => {
     if (!selectedFiles.length) return;
     if (!confirm(`Are you sure you want to delete ${selectedFiles.length} files?`)) return;
+
+    setIsDeleting(true);
+    setProgress(0);
 
     try {
       await Promise.all(
@@ -83,6 +94,9 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
     } catch (error) {
       console.error('Error deleting files:', error);
       alert('Failed to delete some files');
+    } finally {
+      setIsDeleting(false);
+      setProgress(100);
     }
   };
 
@@ -157,6 +171,8 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
           </Button>
         </div>
       )}
+
+      {isDeleting && <Progress value={progress} />}
 
       <Table>
         <Table.Head>
