@@ -3,6 +3,7 @@ import { Table, Button, Pagination, Checkbox, Badge } from 'flowbite-react';
 import { TrashIcon, PencilIcon, PlayIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
 import { KaraokeEditModal } from './KaraokeEditModal';
+import { KaraokeTableRow } from './KaraokeTableRow';
 
 export interface KaraokeFile {
   id: number;
@@ -175,62 +176,15 @@ export function KaraokeList({ files, currentPage, totalPages }: KaraokeListProps
         </Table.Head>
         <Table.Body>
           {karaokeFiles.map((file) => (
-            <Table.Row key={file.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-              <Table.Cell className="w-4 p-4">
-                <Checkbox
-                  checked={selectedFiles.includes(file.id)}
-                  onChange={() => toggleFileSelection(file.id)}
-                />
-              </Table.Cell>
-              <Table.Cell className="font-medium text-gray-900 dark:text-white">
-                <div className="flex items-center space-x-2">
-                  {file.title}
-                  {file.isExplicit && (
-                    <Badge color="warning" size="sm">Explicit</Badge>
-                  )}
-                </div>
-              </Table.Cell>
-              <Table.Cell>{file.artist}</Table.Cell>
-              <Table.Cell>
-                <div className="space-y-1">
-                  <div className="text-sm">{file.language}</div>
-                  {file.genre && <div className="text-sm text-gray-500">{file.genre}</div>}
-                  {file.difficulty && (
-                    <Badge color="info">
-                      Difficulty: {file.difficulty}
-                    </Badge>
-                  )}
-                </div>
-              </Table.Cell>
-              <Table.Cell>
-                <div className="space-y-1 text-sm">
-                  <div>{formatDuration(file.duration)}</div>
-                  <div className="text-gray-500">{formatFileSize(file.fileSize)}</div>
-                  <div className="text-gray-500">{file.mimeType.split('/')[1].toUpperCase()}</div>
-                </div>
-              </Table.Cell>
-              <Table.Cell>
-                {format(new Date(file.uploadedAt), 'MMM d, yyyy')}
-              </Table.Cell>
-              <Table.Cell>
-                <div className="flex items-center space-x-2">
-                  <Button size="sm" color="gray" onClick={() => setPreviewUrl(file.fileUrl)}>
-                    <PlayIcon className="w-4 h-4" />
-                  </Button>
-                  {file.lyricsUrl && (
-                    <Button size="sm" color="gray" onClick={() => window.open(file.lyricsUrl!)}>
-                      <DocumentTextIcon className="w-4 h-4" />
-                    </Button>
-                  )}
-                  <Button size="sm" color="warning" onClick={() => handleEdit(file)}>
-                    <PencilIcon className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" color="failure" onClick={() => handleDelete(file.id)}>
-                    <TrashIcon className="w-4 h-4" />
-                  </Button>
-                </div>
-              </Table.Cell>
-            </Table.Row>
+            <KaraokeTableRow
+              key={file.id}
+              file={file}
+              selectedFiles={selectedFiles}
+              toggleFileSelection={toggleFileSelection}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              setPreviewUrl={setPreviewUrl}
+            />
           ))}
         </Table.Body>
       </Table>

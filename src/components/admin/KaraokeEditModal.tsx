@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Label, TextInput, Select } from 'flowbite-react';
+import { KaraokeEditForm } from './KaraokeEditForm';
 
 interface KaraokeFile {
   id: number;
@@ -81,104 +82,17 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
   return (
     <Modal show={show} onClose={onClose}>
       <Modal.Header>Edit Karaoke File</Modal.Header>
-      <form onSubmit={handleSubmit}>
-        <Modal.Body>
-          <div className="space-y-4">
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="title" value="Title" />
-              </div>
-              <TextInput
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="artist" value="Artist" />
-              </div>
-              <TextInput
-                id="artist"
-                value={formData.artist}
-                onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="language" value="Language" />
-              </div>
-              <Select
-                id="language"
-                value={formData.language}
-                onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                required
-              >
-                <option value="">Select language</option>
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="it">Italian</option>
-                <option value="pt">Portuguese</option>
-                <option value="ja">Japanese</option>
-                <option value="ko">Korean</option>
-                <option value="zh">Chinese</option>
-              </Select>
-            </div>
-
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="genre" value="Genre" />
-              </div>
-              <Select
-                id="genre"
-                value={formData.genre}
-                onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                required
-              >
-                <option value="">Select genre</option>
-                <option value="pop">Pop</option>
-                <option value="rock">Rock</option>
-                <option value="hiphop">Hip Hop</option>
-                <option value="rnb">R&B</option>
-                <option value="country">Country</option>
-                <option value="jazz">Jazz</option>
-                <option value="classical">Classical</option>
-                <option value="electronic">Electronic</option>
-              </Select>
-            </div>
-
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="difficulty" value="Difficulty" />
-              </div>
-              <Select
-                id="difficulty"
-                value={formData.difficulty}
-                onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-              >
-                <option value="">Select difficulty</option>
-                <option value="1">1 - Beginner</option>
-                <option value="2">2 - Easy</option>
-                <option value="3">3 - Medium</option>
-                <option value="4">4 - Hard</option>
-                <option value="5">5 - Expert</option>
-              </Select>
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button type="submit">Save Changes</Button>
-          <Button color="gray" onClick={onClose}>
-            Cancel
-          </Button>
-        </Modal.Footer>
-      </form>
+      <KaraokeEditForm
+        formData={formData}
+        setFormData={setFormData}
+        handleSubmit={handleSubmit}
+      />
+      <Modal.Footer>
+        <Button type="submit" form="karaoke-edit-form">Save Changes</Button>
+        <Button color="gray" onClick={onClose}>
+          Cancel
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
-} 
+}
