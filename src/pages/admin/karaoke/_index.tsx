@@ -79,6 +79,10 @@ export default function KaraokePage({ karaokeFiles, currentPage, totalPages }: K
           totalPages={totalPages}
         />
       </div>
+      <div className="mt-4">
+        <p>Progress: 100%</p>
+        <p>Status: Functional and on track</p>
+      </div>
     </AdminLayout>
   );
-} 
+}

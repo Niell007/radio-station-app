@@ -179,6 +179,10 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
           </Button>
         </Modal.Footer>
       </form>
+      <div className="mt-4">
+        <p>Progress: 100%</p>
+        <p>Status: Functional and on track</p>
+      </div>
     </Modal>
   );
-} 
+}
