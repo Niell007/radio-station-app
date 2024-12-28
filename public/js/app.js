@@ -39,6 +39,13 @@ class RadioPlayer {
         if (this.volumeControl) {
             this.volumeControl.value = this.audio.volume * 100;
         }
+
+        // Upload elements
+        this.uploadForm = document.getElementById('uploadForm');
+        this.songFileInput = document.getElementById('songFile');
+        this.uploadResult = document.getElementById('uploadResult');
+        this.audioPlayer = document.getElementById('audioPlayer');
+        this.progressBar = document.getElementById('progressBar').firstElementChild;
     }
 
     setupEventListeners() {
@@ -75,6 +82,11 @@ class RadioPlayer {
 
         // Load initial content
         this.loadContent('songs');
+
+        // Upload form events
+        this.uploadForm.addEventListener('submit', (e) => this.handleFileUpload(e));
+        this.songFileInput.addEventListener('change', () => this.updateAudioPreview());
+        this.setupDragAndDrop();
     }
 
     handleKeyboardShortcuts(e) {
@@ -495,7 +507,101 @@ class RadioPlayer {
             this.volumeControl.value = this.audio.muted ? 0 : (this.audio.volume * 100);
         }
     }
+
+    async handleFileUpload(event) {
+        event.preventDefault();
+        const songFile = this.songFileInput.files[0];
+
+        if (!songFile) {
+            this.showError('Please select a file to upload.');
+            return;
+        }
+
+        this.showLoadingSpinner(this.uploadResult);
+
+        try {
+            const formData = new FormData();
+            formData.append('songFile', songFile);
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Failed to upload file.');
+            const result = await response.json();
+
+            if (result.success) {
+                this.uploadResult.innerHTML = `<div class="alert alert-success" role="alert">File uploaded successfully!</div>`;
+                this.audioPlayer.src = URL.createObjectURL(songFile);
+                this.audioPlayer.play();
+
+                // Track upload progress
+                const intervalId = setInterval(async () => {
+                    const progressResponse = await fetch(`/progress/${encodeURIComponent(songFile.name)}`);
+                    const progressData = await progressResponse.json();
+
+                    if (progressData.progress >= 100) {
+                        clearInterval(intervalId);
+                    }
+
+                    this.progressBar.style.width = `${progressData.progress}%`;
+                }, 1000);
+            } else {
+                this.showError(result.error || 'Unknown error occurred.');
+            }
+        } catch (error) {
+            this.showError(error.message);
+        } finally {
+            this.removeLoadingSpinner(this.uploadResult);
+        }
+    }
+
+    updateAudioPreview() {
+        const songFile = this.songFileInput.files[0];
+        if (songFile) {
+            this.audioPlayer.src = URL.createObjectURL(songFile);
+        }
+    }
+
+    setupDragAndDrop() {
+        const dropArea = document.getElementById('uploadForm');
+
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropArea.classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            if (files.length) {
+                this.songFileInput.files = files;
+                this.updateAudioPreview();
+            }
+        });
+    }
+
+    showLoadingSpinner(container) {
+        const spinner = document.createElement('div');
+        spinner.classList.add('spinner-border', 'text-light');
+        spinner.role = 'status';
+        spinner.innerHTML = '<span class="sr-only">Loading...</span>';
+        container.appendChild(spinner);
+    }
+
+    removeLoadingSpinner(container) {
+        const spinner = container.querySelector('.spinner-border');
+        if (spinner) {
+            container.removeChild(spinner);
+        }
+    }
 }
 
 // Initialize the player
-const player = new RadioPlayer(); 
+const player = new RadioPlayer();

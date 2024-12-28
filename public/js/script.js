@@ -1,4 +1,3 @@
-// Show loading spinner
 function showLoadingSpinner(container) {
     const spinner = document.createElement('div');
     spinner.classList.add('spinner-border', 'text-light');
@@ -7,7 +6,6 @@ function showLoadingSpinner(container) {
     container.appendChild(spinner);
 }
 
-// Remove loading spinner
 function removeLoadingSpinner(container) {
     const spinner = container.querySelector('.spinner-border');
     if (spinner) {
@@ -15,12 +13,10 @@ function removeLoadingSpinner(container) {
     }
 }
 
-// Error handling
 function showError(container, message) {
     container.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
 }
 
-// Persistent user greeting
 document.addEventListener('DOMContentLoaded', () => {
     const storedName = localStorage.getItem('username');
     if (storedName) {
@@ -36,7 +32,6 @@ document.getElementById('greet-form').addEventListener('submit', async function(
     const messageContainer = document.getElementById('greeting-output');
     messageContainer.innerText = '';
 
-    // Input validation
     if (!name) {
         showError(messageContainer, 'Please enter your name.');
         return;
@@ -48,7 +43,7 @@ document.getElementById('greet-form').addEventListener('submit', async function(
         const response = await fetch(`/greet/${encodeURIComponent(name)}`);
         if (!response.ok) throw new Error('Failed to fetch greeting.');
         const greeting = await response.text();
-        localStorage.setItem('username', name); // Store name in local storage
+        localStorage.setItem('username', name);
         messageContainer.innerText = greeting;
     } catch (error) {
         showError(messageContainer, error.message);
@@ -63,7 +58,6 @@ document.getElementById('search-form').addEventListener('submit', async function
     const resultsContainer = document.getElementById('search-results');
     resultsContainer.innerHTML = '';
 
-    // Input validation
     if (!query) {
         showError(resultsContainer, 'Please enter a search query.');
         return;
@@ -127,7 +121,6 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
             audioPlayer.src = URL.createObjectURL(songFile);
             audioPlayer.play();
 
-            // Track upload progress
             const intervalId = setInterval(async () => {
                 const progressResponse = await fetch(`/progress/${encodeURIComponent(songFile.name)}`);
                 const progressData = await progressResponse.json();
@@ -148,7 +141,6 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
     }
 });
 
-// Button hover effects
 function initializeButtonHoverEffects() {
     const buttons = document.querySelectorAll('[data-hover-image]');
     buttons.forEach(button => {
@@ -164,3 +156,35 @@ function initializeButtonHoverEffects() {
         });
     });
 }
+
+function setupDragAndDrop() {
+    const dropArea = document.getElementById('uploadForm');
+
+    dropArea.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropArea.classList.add('dragover');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('dragover');
+    });
+
+    dropArea.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropArea.classList.remove('dragover');
+        const files = event.dataTransfer.files;
+        if (files.length) {
+            document.getElementById('songFile').files = files;
+            updateAudioPreview();
+        }
+    });
+}
+
+function updateAudioPreview() {
+    const songFile = document.getElementById('songFile').files[0];
+    if (songFile) {
+        document.getElementById('audioPlayer').src = URL.createObjectURL(songFile);
+    }
+}
+
+setupDragAndDrop();

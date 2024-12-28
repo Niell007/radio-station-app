@@ -107,6 +107,16 @@ CREATE TABLE IF NOT EXISTS karaoke_files (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Upload Progress
+CREATE TABLE IF NOT EXISTS upload_progress (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_name TEXT NOT NULL,
+    progress INTEGER NOT NULL,
+    status TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -120,4 +130,5 @@ CREATE INDEX IF NOT EXISTS idx_song_requests_user ON song_requests(requested_by)
 CREATE INDEX IF NOT EXISTS idx_karaoke_search ON karaoke_files(search_vector);
 CREATE INDEX IF NOT EXISTS idx_karaoke_title ON karaoke_files(title);
 CREATE INDEX IF NOT EXISTS idx_karaoke_artist ON karaoke_files(artist);
-CREATE INDEX IF NOT EXISTS idx_karaoke_language ON karaoke_files(language); 
+CREATE INDEX IF NOT EXISTS idx_karaoke_language ON karaoke_files(language);
+CREATE INDEX IF NOT EXISTS idx_upload_progress_file_name ON upload_progress(file_name);
