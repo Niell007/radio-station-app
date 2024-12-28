@@ -1,7 +1,7 @@
 import React from 'react';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { prisma } from '../../../lib/prisma';
-import { KaraokeUploader } from '../../../components/admin/KaraokeUploader';
+import KaraokeUploader from '../../../components/admin/KaraokeUploader';
 import { KaraokeList } from '../../../components/admin/KaraokeList';
 
 export async function getServerSideProps() {
@@ -81,4 +81,4 @@ export default function KaraokePage({ karaokeFiles, currentPage, totalPages }: K
       </div>
     </AdminLayout>
   );
-} 
+}
