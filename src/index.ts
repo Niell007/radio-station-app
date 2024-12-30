@@ -369,4 +369,4 @@ async function handleSongs(request: Request, env: Env): Promise<Response> {
   }
   
   return createErrorResponse('Method not allowed', 405);
-} 
+}

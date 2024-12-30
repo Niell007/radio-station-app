@@ -13,7 +13,7 @@ export default defineConfig({
       type: 'pages'
     }
   }),
-  integrations: [react(), tailwind()],
+  integrations: [cloudflare(), react(), tailwind()],
   vite: {
     build: {
       target: 'esnext',
@@ -29,4 +29,4 @@ export default defineConfig({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
     }
   }
-}); 
+});
