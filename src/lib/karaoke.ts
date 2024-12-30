@@ -371,4 +371,4 @@ export class KaraokeManager {
             total: countResult?.count || 0
         };
     }
-} 
+}

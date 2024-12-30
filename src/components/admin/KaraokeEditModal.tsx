@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Label, TextInput, Select } from 'flowbite-react';
+import { Modal, Button, Label, TextInput, Select, Checkbox } from 'flowbite-react';
 
 interface KaraokeFile {
   id: number;
@@ -170,6 +170,15 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
                 <option value="5">5 - Expert</option>
               </Select>
             </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="explicit"
+                checked={formData.isExplicit}
+                onChange={(e) => setFormData({ ...formData, isExplicit: e.target.checked })}
+              />
+              <Label htmlFor="explicit">Contains Explicit Content</Label>
+            </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
@@ -181,4 +190,4 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
       </form>
     </Modal>
   );
-} 
+}
