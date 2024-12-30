@@ -30,6 +30,25 @@ export const POST: APIRoute = async (context) => {
     // Validate metadata
     const validatedData = songSchema.parse({ title, artist, genre });
 
+    // Validate file type
+    const allowedMimeTypes = [
+      'audio/mpeg',  // MP3
+      'audio/wav',   // WAV
+      'audio/ogg',   // OGG
+      'audio/x-m4a', // M4A
+      'audio/aac',   // AAC
+      'video/mp4',   // MP4
+      'video/x-matroska', // MKV
+      'video/webm'   // WEBM
+    ];
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      return new Response(
+        JSON.stringify({ error: `Invalid file type: ${file.type}. Allowed types: MP3, WAV, OGG, M4A, AAC, MP4, MKV, WEBM` }),
+        { status: 400 }
+      );
+    }
+
     // Upload file to R2
     const bucket = context.locals.runtime.env.BUCKET;
     const fileKey = `songs/${Date.now()}-${file.name}`;
@@ -72,4 +91,4 @@ export const POST: APIRoute = async (context) => {
       { status: 500 }
     );
   }
-}; 
+};
