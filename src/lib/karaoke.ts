@@ -87,6 +87,9 @@ export class KaraokeManager {
         if (file.difficulty !== undefined && (file.difficulty < 1 || file.difficulty > 5)) {
             throw new KaraokeError('Difficulty must be between 1 and 5');
         }
+        if (file.is_explicit !== undefined && typeof file.is_explicit !== 'boolean') {
+            throw new KaraokeError('is_explicit must be a boolean');
+        }
     }
 
     private generateSearchVector(file: KaraokeFile): string {
@@ -95,7 +98,8 @@ export class KaraokeManager {
             file.artist,
             file.language,
             file.genre,
-            file.is_explicit ? 'explicit' : ''
+            file.is_explicit ? 'explicit' : '',
+            file.difficulty ? `difficulty:${file.difficulty}` : ''
         ]
             .filter(Boolean)
             .join(' ')

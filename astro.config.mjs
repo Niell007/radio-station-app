@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
+import prisma from '@astrojs/prisma';
 
 export default defineConfig({
   output: 'server',
@@ -13,14 +14,14 @@ export default defineConfig({
       type: 'pages'
     }
   }),
-  integrations: [cloudflare(), react(), tailwind()],
+  integrations: [cloudflare(), react(), tailwind(), prisma()],
   vite: {
     build: {
       target: 'esnext',
       minify: 'esbuild'
     },
     ssr: {
-      noExternal: ['@heroicons/*', 'flowbite-react', 'jose']
+      noExternal: ['@heroicons/*', 'flowbite-react', 'jose', 'prisma']
     },
     optimizeDeps: {
       exclude: ['@node-rs/argon2']
