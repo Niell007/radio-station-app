@@ -21,7 +21,7 @@ interface KaraokeEditModalProps {
   file: KaraokeFile | null;
   show: boolean;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (updatedFile: KaraokeFile) => void;
 }
 
 export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditModalProps) {
@@ -52,26 +52,29 @@ export function KaraokeEditModal({ file, show, onClose, onSave }: KaraokeEditMod
     if (!file) return;
 
     try {
+      const updatedFile: KaraokeFile = {
+        ...file,
+        title: formData.title,
+        artist: formData.artist,
+        language: formData.language,
+        genre: formData.genre || null,
+        difficulty: formData.difficulty ? parseInt(formData.difficulty) : undefined,
+        isExplicit: formData.isExplicit
+      };
+
       const response = await fetch(`/api/admin/karaoke/${file.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          title: formData.title,
-          artist: formData.artist,
-          language: formData.language,
-          genre: formData.genre || null,
-          difficulty: formData.difficulty ? parseInt(formData.difficulty) : null,
-          isExplicit: formData.isExplicit
-        })
+        body: JSON.stringify(updatedFile)
       });
 
       if (!response.ok) {
         throw new Error('Failed to update file');
       }
 
-      onSave();
+      onSave(updatedFile);
     } catch (error) {
       console.error('Error updating file:', error);
       alert('Failed to update file');
