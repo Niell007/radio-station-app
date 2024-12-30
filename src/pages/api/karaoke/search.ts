@@ -6,6 +6,8 @@ const searchParamsSchema = z.object({
     query: z.string().optional(),
     language: z.string().optional(),
     genre: z.string().optional(),
+    difficulty: z.number().optional(),
+    is_explicit: z.boolean().optional(),
     limit: z.number().default(20),
     offset: z.number().default(0)
 });
@@ -20,6 +22,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
             query: params.query,
             language: params.language,
             genre: params.genre,
+            difficulty: params.difficulty,
+            is_explicit: params.is_explicit,
             per_page: params.limit,
             page: Math.floor(params.offset / params.limit) + 1
         });

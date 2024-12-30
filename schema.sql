@@ -104,7 +104,9 @@ CREATE TABLE IF NOT EXISTS karaoke_files (
     mime_type TEXT NOT NULL,
     search_vector TEXT NOT NULL,
     uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    difficulty INTEGER,
+    is_explicit BOOLEAN
 );
 
 -- Create indexes for performance
