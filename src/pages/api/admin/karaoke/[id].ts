@@ -1,31 +1,42 @@
 import type { APIRoute } from 'astro';
-import { KaraokeManager } from '../../../../lib/karaoke';
+import { z } from 'zod';
+import { prisma } from '../../../../../lib/prisma';
 
-export const PUT: APIRoute = async ({ request, params, locals }) => {
+const updateKaraokeFileSchema = z.object({
+  title: z.string().min(1),
+  artist: z.string().min(1),
+  language: z.string().min(2).max(2),
+  genre: z.string().optional(),
+  file_url: z.string().url(),
+  lyrics_url: z.string().url().optional(),
+  duration: z.number().positive(),
+  file_size: z.number().positive(),
+  mime_type: z.string(),
+  difficulty: z.number().min(1).max(5).optional(),
+  is_explicit: z.boolean().optional()
+});
+
+export const PUT: APIRoute = async ({ params, request }) => {
+  const id = Number(params.id);
+  if (isNaN(id)) {
+    return new Response(JSON.stringify({ error: 'Invalid ID' }), { status: 400 });
+  }
+
   try {
-    const id = parseInt(params.id as string);
     const data = await request.json();
+    const validatedData = updateKaraokeFileSchema.parse(data);
 
-    const manager = new KaraokeManager(locals.env.DB);
-    await manager.update(id, data);
+    const updatedFile = await prisma.karaokeFile.update({
+      where: { id },
+      data: validatedData
+    });
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return new Response(JSON.stringify(updatedFile), { status: 200 });
   } catch (error) {
     console.error('Error updating karaoke file:', error);
-    return new Response(JSON.stringify({ error: 'Failed to update karaoke file' }), { status: 500 });
-  }
-};
-
-export const DELETE: APIRoute = async ({ params, locals }) => {
-  try {
-    const id = parseInt(params.id as string);
-
-    const manager = new KaraokeManager(locals.env.DB);
-    await manager.delete(id);
-
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
-  } catch (error) {
-    console.error('Error deleting karaoke file:', error);
-    return new Response(JSON.stringify({ error: 'Failed to delete karaoke file' }), { status: 500 });
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: error.errors }), { status: 400 });
+    }
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
   }
 };

@@ -110,6 +110,8 @@ model KaraokeFile {
   searchVector  String?  @map("search_vector")
   uploadedAt    DateTime @default(now()) @map("uploaded_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+  difficulty    Int?
+  isExplicit    Boolean?
 
   @@map("karaoke_files")
 }
