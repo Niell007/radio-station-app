@@ -49,4 +49,4 @@ export function Navbar({ user }: NavbarProps) {
       </div>
     </FlowbiteNavbar>
   );
-} 
+}
