@@ -103,7 +103,14 @@ import Navigation from '../components/Navigation.astro';
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        body: formData,
+        body: JSON.stringify({
+          username: formData.get('username'),
+          email: formData.get('email'),
+          password: formData.get('password')
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       
       if (response.ok) {
@@ -117,4 +124,4 @@ import Navigation from '../components/Navigation.astro';
       alert('Failed to create account. Please try again.');
     }
   });
-</script> 
+</script>

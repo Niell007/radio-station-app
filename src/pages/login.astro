@@ -93,7 +93,13 @@ if (await isAuthenticated(Astro)) {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        body: formData,
+        body: JSON.stringify({
+          email: formData.get('email'),
+          password: formData.get('password')
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       
       if (response.ok) {
@@ -109,4 +115,4 @@ if (await isAuthenticated(Astro)) {
       errorMessage.classList.remove('hidden');
     }
   });
-</script> 
+</script>
