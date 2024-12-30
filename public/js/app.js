@@ -495,7 +495,118 @@ class RadioPlayer {
             this.volumeControl.value = this.audio.muted ? 0 : (this.audio.volume * 100);
         }
     }
+
+    async requestSong(songId) {
+        try {
+            const response = await fetch('/api/song-requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ songId })
+            });
+
+            if (response.ok) {
+                this.showNotification('Song requested successfully');
+            } else {
+                throw new Error('Failed to request song');
+            }
+        } catch (error) {
+            console.error('Error requesting song:', error);
+            this.showError('Failed to request song');
+        }
+    }
+
+    async toggleFavorite(event, songId) {
+        event.stopPropagation();
+        try {
+            const response = await fetch(`/api/favorites/${songId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (response.ok) {
+                this.showNotification('Favorite updated successfully');
+                await this.loadFavorites();
+            } else {
+                throw new Error('Failed to update favorite');
+            }
+        } catch (error) {
+            console.error('Error updating favorite:', error);
+            this.showError('Failed to update favorite');
+        }
+    }
+
+    async createPlaylist(name, description, isPublic) {
+        try {
+            const response = await fetch('/api/playlists', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ name, description, isPublic })
+            });
+
+            if (response.ok) {
+                this.showNotification('Playlist created successfully');
+                await this.loadPlaylists();
+            } else {
+                throw new Error('Failed to create playlist');
+            }
+        } catch (error) {
+            console.error('Error creating playlist:', error);
+            this.showError('Failed to create playlist');
+        }
+    }
+
+    async savePlaylist(playlistId, songs) {
+        try {
+            const response = await fetch(`/api/playlists/${playlistId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ songs })
+            });
+
+            if (response.ok) {
+                this.showNotification('Playlist saved successfully');
+                await this.loadPlaylists();
+            } else {
+                throw new Error('Failed to save playlist');
+            }
+        } catch (error) {
+            console.error('Error saving playlist:', error);
+            this.showError('Failed to save playlist');
+        }
+    }
+
+    async loadPlaylist(playlistId) {
+        try {
+            const response = await fetch(`/api/playlists/${playlistId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (response.ok) {
+                const playlist = await response.json();
+                this.playlist = playlist.songs;
+                this.showNotification('Playlist loaded successfully');
+            } else {
+                throw new Error('Failed to load playlist');
+            }
+        } catch (error) {
+            console.error('Error loading playlist:', error);
+            this.showError('Failed to load playlist');
+        }
+    }
 }
 
 // Initialize the player
-const player = new RadioPlayer(); 
+const player = new RadioPlayer();
