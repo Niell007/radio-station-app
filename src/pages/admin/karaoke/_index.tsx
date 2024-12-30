@@ -81,4 +81,4 @@ export default function KaraokePage({ karaokeFiles, currentPage, totalPages }: K
       </div>
     </AdminLayout>
   );
-} 
+}
