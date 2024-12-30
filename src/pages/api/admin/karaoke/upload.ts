@@ -9,7 +9,10 @@ const ALLOWED_MIME_TYPES = [
     'audio/wav',   // WAV
     'audio/ogg',   // OGG
     'audio/x-m4a', // M4A
-    'audio/aac'    // AAC
+    'audio/aac',   // AAC
+    'video/mp4',   // MP4
+    'video/x-matroska', // MKV
+    'video/webm'   // WEBM
 ];
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -33,7 +36,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // Validate file type
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
             return new Response(JSON.stringify({
-                error: `Invalid file type: ${file.type}. Allowed types: MP3, WAV, OGG, M4A, AAC`
+                error: `Invalid file type: ${file.type}. Allowed types: MP3, WAV, OGG, M4A, AAC, MP4, MKV, WEBM`
             }), { status: 400 });
         }
 
@@ -83,4 +86,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
             error: 'Failed to upload karaoke file'
         }), { status: 500 });
     }
-}; 
+};

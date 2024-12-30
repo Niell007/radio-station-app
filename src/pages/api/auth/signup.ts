@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
 import { hash } from '@node-rs/argon2';
-import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
 
 const signupSchema = z.object({
@@ -9,20 +8,15 @@ const signupSchema = z.object({
   password: z.string().min(8),
 });
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json();
     const { username, email, password } = signupSchema.parse(body);
 
     // Check if user already exists
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { username },
-          { email }
-        ]
-      }
-    });
+    const existingUser = await locals.env.DB.prepare(`
+      SELECT * FROM users WHERE username = ? OR email = ?
+    `).bind(username, email).first();
 
     if (existingUser) {
       return new Response(
@@ -33,21 +27,19 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Hash password and create user
     const passwordHash = await hash(password);
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        passwordHash,
-        role: 'user'
-      }
-    });
+    const result = await locals.env.DB.prepare(`
+      INSERT INTO users (username, email, password_hash, role)
+      VALUES (?, ?, ?, 'user')
+    `).bind(username, email, passwordHash).run();
+
+    const userId = result.lastRowId;
 
     return new Response(
       JSON.stringify({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role
+        id: userId,
+        username,
+        email,
+        role: 'user'
       }),
       { status: 201 }
     );
@@ -64,4 +56,4 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 500 }
     );
   }
-}; 
+};

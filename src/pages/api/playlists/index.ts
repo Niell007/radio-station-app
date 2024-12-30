@@ -103,4 +103,112 @@ export const POST: APIRoute = async (context) => {
       { status: 500 }
     );
   }
-}; 
+};
+
+// Update playlist
+export const PUT: APIRoute = async (context) => {
+  const authResponse = await requireAuth()(context);
+  if (authResponse) return authResponse;
+
+  const user = (context.request as AuthenticatedRequest).user!;
+
+  try {
+    const data = await context.request.json();
+    const validatedData = playlistSchema.safeParse(data);
+
+    if (!validatedData.success) {
+      return new Response(
+        JSON.stringify({ 
+          message: 'Invalid input',
+          errors: validatedData.error.errors 
+        }),
+        { status: 400 }
+      );
+    }
+
+    const playlistId = context.params.id;
+    const db = context.locals.runtime.env.DB;
+
+    // Check if the playlist exists and belongs to the user
+    const existingPlaylist = await db
+      .prepare('SELECT * FROM playlists WHERE id = ? AND user_id = ?')
+      .bind(playlistId, user.id)
+      .first<Playlist>();
+
+    if (!existingPlaylist) {
+      return new Response(
+        JSON.stringify({ message: 'Playlist not found or access denied' }),
+        { status: 404 }
+      );
+    }
+
+    // Update playlist
+    await db
+      .prepare(`
+        UPDATE playlists
+        SET title = ?, description = ?, is_public = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `)
+      .bind(
+        validatedData.data.title,
+        validatedData.data.description || null,
+        validatedData.data.is_public || false,
+        playlistId
+      )
+      .run();
+
+    return new Response(
+      JSON.stringify({ message: 'Playlist updated successfully' }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error updating playlist:', error);
+    return new Response(
+      JSON.stringify({ message: 'Internal server error' }),
+      { status: 500 }
+    );
+  }
+};
+
+// Delete playlist
+export const DELETE: APIRoute = async (context) => {
+  const authResponse = await requireAuth()(context);
+  if (authResponse) return authResponse;
+
+  const user = (context.request as AuthenticatedRequest).user!;
+
+  try {
+    const playlistId = context.params.id;
+    const db = context.locals.runtime.env.DB;
+
+    // Check if the playlist exists and belongs to the user
+    const existingPlaylist = await db
+      .prepare('SELECT * FROM playlists WHERE id = ? AND user_id = ?')
+      .bind(playlistId, user.id)
+      .first<Playlist>();
+
+    if (!existingPlaylist) {
+      return new Response(
+        JSON.stringify({ message: 'Playlist not found or access denied' }),
+        { status: 404 }
+      );
+    }
+
+    // Delete playlist
+    await db
+      .prepare('DELETE FROM playlists WHERE id = ?')
+      .bind(playlistId)
+      .run();
+
+    return new Response(
+      JSON.stringify({ message: 'Playlist deleted successfully' }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error deleting playlist:', error);
+    return new Response(
+      JSON.stringify({ message: 'Internal server error' }),
+      { status: 500 }
+    );
+  }
+};

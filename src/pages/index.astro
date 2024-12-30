@@ -70,6 +70,66 @@ const currentShow = {
           </button>
         </form>
       </section>
+
+      <!-- Search Section -->
+      <section class="bg-white bg-opacity-10 p-6 rounded-lg backdrop-blur-sm">
+        <h2 class="text-xl font-bold text-white mb-4">Search</h2>
+        <form id="searchForm" class="space-y-4">
+          <div>
+            <label class="block text-gray-300 mb-2">Search for Songs, Artists, or Paragraphs</label>
+            <input type="text" id="searchQuery" class="w-full px-3 py-2 bg-black bg-opacity-50 text-white rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Type your search query here...">
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            Search
+          </button>
+        </form>
+        <div id="searchResults" class="mt-4 space-y-4"></div>
+      </section>
     </div>
   </main>
-</Layout> 
+</Layout>
+
+<script>
+  document.getElementById('searchForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = document.getElementById('searchQuery').value;
+    const resultsContainer = document.getElementById('searchResults');
+    resultsContainer.innerHTML = '';
+
+    try {
+      const response = await fetch('/api/karaoke/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query })
+      });
+
+      if (!response.ok) throw new Error('Search failed');
+
+      const data = await response.json();
+      data.files.forEach(file => {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'bg-black bg-opacity-50 p-4 rounded-lg';
+        resultItem.innerHTML = `
+          <h3 class="text-lg font-semibold text-white">${file.title}</h3>
+          <p class="text-gray-300">${file.artist}</p>
+          <p class="text-gray-300">${file.language} - ${file.genre || 'Unknown Genre'}</p>
+          <button onclick="window.audioPlayer.playSong({
+            id: ${file.id},
+            title: '${file.title}',
+            artist: '${file.artist}',
+            fileUrl: '${file.file_url}',
+            duration: ${file.duration}
+          })" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            Play Now
+          </button>
+        `;
+        resultsContainer.appendChild(resultItem);
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+      resultsContainer.innerHTML = '<p class="text-red-500">Failed to search. Please try again later.</p>';
+    }
+  });
+</script>

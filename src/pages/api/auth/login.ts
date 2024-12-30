@@ -1,6 +1,9 @@
 import type { APIRoute } from 'astro';
 import * as bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { prisma } from '../../../lib/prisma';
+import { createJWT } from '../../../utils/jwt';
+import { setCookie } from '../../../utils/cookies';
 
 // Define the login request schema
 const loginSchema = z.object({
@@ -14,28 +17,6 @@ interface DBUser {
     email: string;
     password_hash: string;
     role: string;
-}
-
-// Simple JWT implementation
-function createJWT(payload: any, secret: string): string {
-    const header = { alg: 'HS256', typ: 'JWT' };
-    const now = Math.floor(Date.now() / 1000);
-    const claims = {
-        ...payload,
-        iat: now,
-        exp: now + 86400 // 24 hours
-    };
-
-    const base64Header = btoa(JSON.stringify(header));
-    const base64Payload = btoa(JSON.stringify(claims));
-    const signature = btoa(
-        JSON.stringify({
-            data: base64Header + '.' + base64Payload,
-            secret
-        })
-    );
-
-    return `${base64Header}.${base64Payload}.${signature}`;
 }
 
 async function loginUser(email: string, password: string, db: any, secret: string) {
@@ -92,7 +73,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         }), {
             status: 200,
             headers: {
-                'Set-Cookie': `session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400`
+                'Set-Cookie': setCookie('session', token, { httpOnly: true, sameSite: 'strict', maxAge: 86400 })
             }
         });
     } catch (error) {
