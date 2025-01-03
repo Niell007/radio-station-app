@@ -2,6 +2,12 @@
 
 A modern web application for managing a radio station, built with Astro and deployed on Cloudflare Pages.
 
+## Project Name and Purpose
+
+**Project Name**: Radio Station App
+
+**Purpose**: The Radio Station App is designed to provide a comprehensive solution for managing a radio station. It includes features for music library management, karaoke system, show scheduling, user authentication, admin dashboard, and playlist management.
+
 ## Features
 
 - 🎵 Music Library Management
@@ -109,6 +115,20 @@ Run database migrations:
 ```bash
 npm run prisma:migrate
 ```
+
+## Security Considerations
+
+- **Authentication**: Implemented using JWT and Argon2 for secure password hashing.
+- **Authorization**: Role-based access control to ensure users have appropriate permissions.
+- **Data Encryption**: Sensitive data such as passwords and session tokens are encrypted.
+- **Security Best Practices**: Regular security audits and updates to dependencies.
+- **Environment-specific Configurations**: Separate configurations for development, staging, and production environments.
+
+## Performance Requirements
+
+- **Expected Load Capacity**: The application is designed to handle up to 10,000 concurrent users.
+- **Response Time Targets**: Average response time should be under 200ms.
+- **Scalability Considerations**: The application is built to scale horizontally with the use of Cloudflare's serverless infrastructure.
 
 ## Contributing
 

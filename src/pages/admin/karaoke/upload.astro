@@ -1,6 +1,17 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import KaraokeUploader from '../../../components/admin/KaraokeUploader';
+import { createCipheriv, randomBytes } from 'crypto';
+
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+    const iv = randomBytes(16);
+    const cipher = createCipheriv(algorithm, secretKey, iv);
+    const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+    return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
 ---
 
 <AdminLayout title="Upload Karaoke Files">
@@ -20,4 +31,4 @@ import KaraokeUploader from '../../../components/admin/KaraokeUploader';
         </div>
         <KaraokeUploader client:load />
     </div>
-</AdminLayout> 
+</AdminLayout>

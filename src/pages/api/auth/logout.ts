@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { prisma } from '../../../lib/prisma';
+import { createSecretKey, createHmac } from 'crypto';
 
 export const POST: APIRoute = async ({ cookies }) => {
   try {
@@ -11,9 +12,12 @@ export const POST: APIRoute = async ({ cookies }) => {
       );
     }
 
+    // Decrypt session ID
+    const decryptedSessionId = decryptSessionId(sessionId, process.env.SESSION_SECRET || 'your-secret-key');
+
     // Delete session from database
     await prisma.session.delete({
-      where: { id: sessionId }
+      where: { id: decryptedSessionId }
     }).catch(() => {
       // Ignore errors if session doesn't exist
     });
@@ -32,4 +36,19 @@ export const POST: APIRoute = async ({ cookies }) => {
       { status: 500 }
     );
   }
-}; 
+};
+
+// Decrypt session ID function
+function decryptSessionId(encryptedSessionId: string, secret: string): string {
+  const [base64Header, base64Payload, signature] = encryptedSessionId.split('.');
+  const expectedSignature = createHmac('sha256', createSecretKey(Buffer.from(secret)))
+    .update(`${base64Header}.${base64Payload}`)
+    .digest('base64');
+
+  if (signature !== expectedSignature) {
+    throw new Error('Invalid session ID');
+  }
+
+  const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString('utf-8'));
+  return payload.sub;
+}

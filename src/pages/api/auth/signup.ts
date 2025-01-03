@@ -2,12 +2,30 @@ import type { APIRoute } from 'astro';
 import { hash } from '@node-rs/argon2';
 import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
+import { createCipheriv, randomBytes, createDecipheriv } from 'crypto';
 
 const signupSchema = z.object({
   username: z.string().min(3).max(50),
   email: z.string().email(),
   password: z.string().min(8),
 });
+
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+const iv = randomBytes(16);
+
+function encrypt(text: string) {
+  const cipher = createCipheriv(algorithm, secretKey, iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
+function decrypt(hash: string) {
+  const [iv, content] = hash.split(':');
+  const decipher = createDecipheriv(algorithm, secretKey, Buffer.from(iv, 'hex'));
+  const decrypted = Buffer.concat([decipher.update(Buffer.from(content, 'hex')), decipher.final()]);
+  return decrypted.toString();
+}
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -33,11 +51,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Hash password and create user
     const passwordHash = await hash(password);
+    const encryptedPasswordHash = encrypt(passwordHash);
     const user = await prisma.user.create({
       data: {
         username,
         email,
-        passwordHash,
+        passwordHash: encryptedPasswordHash,
         role: 'user'
       }
     });
@@ -64,4 +83,4 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 500 }
     );
   }
-}; 
+};
