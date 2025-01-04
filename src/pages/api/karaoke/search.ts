@@ -15,6 +15,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const data = await request.json();
         const params = searchParamsSchema.parse(data);
 
+        if (!params.query) {
+            return new Response(JSON.stringify({
+                error: 'Query parameter is required'
+            }), { status: 400 });
+        }
+
         const manager = new KaraokeManager(locals.runtime.env.DB);
         const { data: files, total } = await manager.search({
             query: params.query,

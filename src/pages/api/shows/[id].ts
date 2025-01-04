@@ -1,31 +1,33 @@
 import type { APIRoute } from 'astro';
-import { z } from 'zod';
 import { requireAuth, type AuthenticatedRequest } from '../../../middleware/auth';
 import { prisma } from '../../../lib/prisma';
+import { z } from 'zod';
+import { createCipheriv, randomBytes } from 'crypto';
 
-const showUpdateSchema = z.object({
-  title: z.string().min(1).max(100).optional(),
+const showSchema = z.object({
+  title: z.string().min(1).max(100),
   description: z.string().optional(),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  daysOfWeek: z.string().optional()
+  startTime: z.string(),
+  endTime: z.string(),
+  daysOfWeek: z.string()
 });
+
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(algorithm, secretKey, iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
 
 export const GET: APIRoute = async (context) => {
   const authResponse = await requireAuth()(context);
   if (authResponse) return authResponse;
 
-  const { id } = context.params;
-  if (!id || isNaN(Number(id))) {
-    return new Response(
-      JSON.stringify({ error: 'Invalid show ID' }),
-      { status: 400 }
-    );
-  }
-
   try {
-    const show = await prisma.show.findUnique({
-      where: { id: Number(id) },
+    const shows = await prisma.show.findMany({
       include: {
         host: {
           select: {
@@ -35,21 +37,69 @@ export const GET: APIRoute = async (context) => {
       }
     });
 
-    if (!show) {
-      return new Response(
-        JSON.stringify({ error: 'Show not found' }),
-        { status: 404 }
-      );
-    }
-
     return new Response(
-      JSON.stringify(show),
+      JSON.stringify(shows),
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching show:', error);
+    console.error('Error fetching shows:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch show' }),
+      JSON.stringify({ error: 'Failed to fetch shows' }),
+      { status: 500 }
+    );
+  }
+};
+
+export const POST: APIRoute = async (context) => {
+  const authResponse = await requireAuth()(context);
+  if (authResponse) return authResponse;
+
+  try {
+    const body = await context.request.json();
+    const { title, description, startTime, endTime, daysOfWeek } = showSchema.parse(body);
+    const user = (context.request as AuthenticatedRequest).user!;
+
+    if (!title) {
+      return new Response(
+        JSON.stringify({ error: 'Show title is required' }),
+        { status: 400 }
+      );
+    }
+
+    const encryptedTitle = encrypt(title);
+
+    const show = await prisma.show.create({
+      data: {
+        title: encryptedTitle,
+        description,
+        startTime,
+        endTime,
+        daysOfWeek,
+        hostId: user.id
+      },
+      include: {
+        host: {
+          select: {
+            username: true
+          }
+        }
+      }
+    });
+
+    return new Response(
+      JSON.stringify(show),
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Error creating show:', error);
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data', details: error.errors }),
+        { status: 400 }
+      );
+    }
+    return new Response(
+      JSON.stringify({ error: 'Failed to create show' }),
       { status: 500 }
     );
   }
@@ -59,20 +109,11 @@ export const PUT: APIRoute = async (context) => {
   const authResponse = await requireAuth()(context);
   if (authResponse) return authResponse;
 
-  const { id } = context.params;
-  if (!id || isNaN(Number(id))) {
-    return new Response(
-      JSON.stringify({ error: 'Invalid show ID' }),
-      { status: 400 }
-    );
-  }
-
   try {
+    const id = context.params.id;
     const body = await context.request.json();
-    const updates = showUpdateSchema.parse(body);
-    const user = (context.request as AuthenticatedRequest).user!;
+    const { title, description, startTime, endTime, daysOfWeek } = showSchema.parse(body);
 
-    // Check if user is authorized to update this show
     const show = await prisma.show.findUnique({
       where: { id: Number(id) }
     });
@@ -84,22 +125,16 @@ export const PUT: APIRoute = async (context) => {
       );
     }
 
-    if (show.hostId !== user.id && user.role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'Not authorized to update this show' }),
-        { status: 403 }
-      );
-    }
+    const encryptedTitle = encrypt(title);
 
     const updatedShow = await prisma.show.update({
       where: { id: Number(id) },
-      data: updates,
-      include: {
-        host: {
-          select: {
-            username: true
-          }
-        }
+      data: {
+        title: encryptedTitle,
+        description,
+        startTime,
+        endTime,
+        daysOfWeek
       }
     });
 
@@ -121,54 +156,3 @@ export const PUT: APIRoute = async (context) => {
     );
   }
 };
-
-export const DELETE: APIRoute = async (context) => {
-  const authResponse = await requireAuth()(context);
-  if (authResponse) return authResponse;
-
-  const { id } = context.params;
-  if (!id || isNaN(Number(id))) {
-    return new Response(
-      JSON.stringify({ error: 'Invalid show ID' }),
-      { status: 400 }
-    );
-  }
-
-  try {
-    const user = (context.request as AuthenticatedRequest).user!;
-
-    // Check if user is authorized to delete this show
-    const show = await prisma.show.findUnique({
-      where: { id: Number(id) }
-    });
-
-    if (!show) {
-      return new Response(
-        JSON.stringify({ error: 'Show not found' }),
-        { status: 404 }
-      );
-    }
-
-    if (show.hostId !== user.id && user.role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'Not authorized to delete this show' }),
-        { status: 403 }
-      );
-    }
-
-    await prisma.show.delete({
-      where: { id: Number(id) }
-    });
-
-    return new Response(
-      JSON.stringify({ message: 'Show deleted successfully' }),
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Error deleting show:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to delete show' }),
-      { status: 500 }
-    );
-  }
-}; 

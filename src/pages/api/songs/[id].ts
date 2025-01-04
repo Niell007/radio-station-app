@@ -1,47 +1,74 @@
 import type { APIRoute } from 'astro';
-import { requireAuth } from '../../../middleware/auth';
+import { prisma } from '../../../lib/prisma';
+import { z } from 'zod';
+import { createCipheriv, randomBytes } from 'crypto';
 
-export const GET: APIRoute = async (context) => {
-  const authResponse = await requireAuth()(context);
-  if (authResponse) return authResponse;
+const songSchema = z.object({
+  title: z.string().min(1).max(100),
+  artist: z.string().min(1).max(100),
+  genre: z.string().optional()
+});
 
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(algorithm, secretKey, iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
+export const PUT: APIRoute = async ({ request, params }) => {
   try {
-    const songId = context.params.id;
-    if (!songId) {
+    const id = parseInt(params.id as string);
+    if (isNaN(id)) {
       return new Response(
-        JSON.stringify({ message: 'Song ID is required' }),
+        JSON.stringify({ error: 'Invalid song ID' }),
         { status: 400 }
       );
     }
 
-    const db = context.locals.runtime.env.DB;
-    const song = await db
-      .prepare(`
-        SELECT id, title, artist, genre, file_url, duration
-        FROM songs
-        WHERE id = ?
-      `)
-      .bind(songId)
-      .first();
+    const data = await request.json();
+    const validatedData = songSchema.parse(data);
+
+    const song = await prisma.song.findUnique({
+      where: { id }
+    });
 
     if (!song) {
       return new Response(
-        JSON.stringify({ message: 'Song not found' }),
+        JSON.stringify({ error: 'Song not found' }),
         { status: 404 }
       );
     }
 
-    return new Response(JSON.stringify(song), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json'
+    const encryptedTitle = encrypt(validatedData.title);
+
+    const updatedSong = await prisma.song.update({
+      where: { id },
+      data: {
+        title: encryptedTitle,
+        artist: validatedData.artist,
+        genre: validatedData.genre || null
       }
     });
-  } catch (error) {
-    console.error('Error fetching song:', error);
+
     return new Response(
-      JSON.stringify({ message: 'Internal server error' }),
+      JSON.stringify(updatedSong),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error updating song:', error);
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data', details: error.errors }),
+        { status: 400 }
+      );
+    }
+    return new Response(
+      JSON.stringify({ error: 'Failed to update song' }),
       { status: 500 }
     );
   }
-}; 
+};

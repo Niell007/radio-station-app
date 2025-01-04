@@ -38,6 +38,24 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
+    // Validate file type
+    const allowedFileTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/flac'];
+    if (!allowedFileTypes.includes(file.type)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid file type' }),
+        { status: 400 }
+      );
+    }
+
+    // Validate file size
+    const maxFileSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxFileSize) {
+      return new Response(
+        JSON.stringify({ error: 'File too large' }),
+        { status: 400 }
+      );
+    }
+
     // Validate metadata
     const validatedData = songSchema.parse({ title, artist, genre });
 

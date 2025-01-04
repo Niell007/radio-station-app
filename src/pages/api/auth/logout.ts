@@ -7,7 +7,7 @@ export const POST: APIRoute = async ({ cookies }) => {
     const sessionId = cookies.get('session')?.value;
     if (!sessionId) {
       return new Response(
-        JSON.stringify({ error: 'Not logged in' }),
+        JSON.stringify({ error: 'Invalid session' }),
         { status: 401 }
       );
     }
@@ -16,11 +16,18 @@ export const POST: APIRoute = async ({ cookies }) => {
     const decryptedSessionId = decryptSessionId(sessionId, process.env.SESSION_SECRET || 'your-secret-key');
 
     // Delete session from database
-    await prisma.session.delete({
+    const session = await prisma.session.delete({
       where: { id: decryptedSessionId }
     }).catch(() => {
       // Ignore errors if session doesn't exist
     });
+
+    if (!session) {
+      return new Response(
+        JSON.stringify({ error: 'Session not found' }),
+        { status: 404 }
+      );
+    }
 
     // Clear session cookie
     cookies.delete('session', { path: '/' });

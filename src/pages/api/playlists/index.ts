@@ -78,6 +78,13 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
+    if (!validatedData.data.title) {
+      return new Response(
+        JSON.stringify({ message: 'Title is required' }),
+        { status: 400 }
+      );
+    }
+
     // Encrypt playlist title
     const encryptedTitle = encrypt(validatedData.data.title);
 

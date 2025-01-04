@@ -59,6 +59,13 @@ export const POST: APIRoute = async (context) => {
     const { title, description, startTime, endTime, daysOfWeek } = showSchema.parse(body);
     const user = (context.request as AuthenticatedRequest).user!;
 
+    if (!title) {
+      return new Response(
+        JSON.stringify({ error: 'Show title is required' }),
+        { status: 400 }
+      );
+    }
+
     const encryptedTitle = encrypt(title);
 
     const show = await prisma.show.create({
