@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import * as bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { createSecretKey, createHmac } from 'crypto';
 
 // Define the login request schema
 const loginSchema = z.object({
@@ -16,7 +17,29 @@ interface DBUser {
     role: string;
 }
 
-// Simple JWT implementation
+// Custom error classes
+class InvalidEmailError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'InvalidEmailError';
+    }
+}
+
+class InvalidPasswordError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'InvalidPasswordError';
+    }
+}
+
+class UserNotFoundError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'UserNotFoundError';
+    }
+}
+
+// Simple JWT implementation with HMAC SHA-256 encryption
 function createJWT(payload: any, secret: string): string {
     const header = { alg: 'HS256', typ: 'JWT' };
     const now = Math.floor(Date.now() / 1000);
@@ -26,14 +49,11 @@ function createJWT(payload: any, secret: string): string {
         exp: now + 86400 // 24 hours
     };
 
-    const base64Header = btoa(JSON.stringify(header));
-    const base64Payload = btoa(JSON.stringify(claims));
-    const signature = btoa(
-        JSON.stringify({
-            data: base64Header + '.' + base64Payload,
-            secret
-        })
-    );
+    const base64Header = Buffer.from(JSON.stringify(header)).toString('base64');
+    const base64Payload = Buffer.from(JSON.stringify(claims)).toString('base64');
+    const signature = createHmac('sha256', createSecretKey(Buffer.from(secret)))
+        .update(`${base64Header}.${base64Payload}`)
+        .digest('base64');
 
     return `${base64Header}.${base64Payload}.${signature}`;
 }
@@ -46,13 +66,13 @@ async function loginUser(email: string, password: string, db: any, secret: strin
         .first<DBUser>();
 
     if (!user) {
-        throw new Error('Invalid email or password');
+        throw new UserNotFoundError('User not found');
     }
 
     // Verify password
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
-        throw new Error('Invalid email or password');
+        throw new InvalidPasswordError('Invalid password');
     }
 
     // Generate session token
@@ -102,9 +122,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
                 error: 'Invalid input',
                 details: error.errors
             }), { status: 400 });
+        } else if (error instanceof UserNotFoundError) {
+            return new Response(JSON.stringify({
+                error: 'User not found'
+            }), { status: 404 });
+        } else if (error instanceof InvalidPasswordError) {
+            return new Response(JSON.stringify({
+                error: 'Invalid password'
+            }), { status: 401 });
+        } else {
+            return new Response(JSON.stringify({
+                error: 'Internal server error'
+            }), { status: 500 });
         }
-        return new Response(JSON.stringify({
-            error: 'Internal server error'
-        }), { status: 500 });
     }
 };

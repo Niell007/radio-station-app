@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { requireAuth, type AuthenticatedRequest } from '../../../middleware/auth';
 import { z } from 'zod';
+import { createCipheriv, randomBytes } from 'crypto';
 
 interface Playlist {
   id: number;
@@ -19,6 +20,16 @@ const playlistSchema = z.object({
   description: z.string().optional(),
   is_public: z.boolean().optional()
 });
+
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(algorithm, secretKey, iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
 
 // Get all playlists (public ones and user's private ones)
 export const GET: APIRoute = async (context) => {
@@ -67,6 +78,9 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
+    // Encrypt playlist title
+    const encryptedTitle = encrypt(validatedData.data.title);
+
     // Create playlist
     const db = context.locals.runtime.env.DB;
     const result = await db
@@ -77,7 +91,7 @@ export const POST: APIRoute = async (context) => {
         ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `)
       .bind(
-        validatedData.data.title,
+        encryptedTitle,
         validatedData.data.description || null,
         user.id,
         validatedData.data.is_public || false
@@ -103,4 +117,4 @@ export const POST: APIRoute = async (context) => {
       { status: 500 }
     );
   }
-}; 
+};

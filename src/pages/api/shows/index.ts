@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { requireAuth, type AuthenticatedRequest } from '../../../middleware/auth';
 import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
+import { createCipheriv, randomBytes } from 'crypto';
 
 const showSchema = z.object({
   title: z.string().min(1).max(100),
@@ -10,6 +11,16 @@ const showSchema = z.object({
   endTime: z.string(),
   daysOfWeek: z.string()
 });
+
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(algorithm, secretKey, iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
 
 export const GET: APIRoute = async (context) => {
   const authResponse = await requireAuth()(context);
@@ -48,9 +59,11 @@ export const POST: APIRoute = async (context) => {
     const { title, description, startTime, endTime, daysOfWeek } = showSchema.parse(body);
     const user = (context.request as AuthenticatedRequest).user!;
 
+    const encryptedTitle = encrypt(title);
+
     const show = await prisma.show.create({
       data: {
-        title,
+        title: encryptedTitle,
         description,
         startTime,
         endTime,
@@ -83,4 +96,4 @@ export const POST: APIRoute = async (context) => {
       { status: 500 }
     );
   }
-}; 
+};

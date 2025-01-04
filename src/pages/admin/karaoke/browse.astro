@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { KaraokeList } from '../../../components/admin/KaraokeList';
 import type { KaraokeFile } from '../../../components/admin/KaraokeList';
 import { KaraokeManager } from '../../../lib/karaoke';
+import { createCipheriv, randomBytes } from 'crypto';
 
 // Get query parameters
 const page = parseInt(Astro.url.searchParams.get('page') || '1');
@@ -23,6 +24,16 @@ const { files: dbFiles, total } = await manager.list({
     filter
 });
 
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+    const iv = randomBytes(16);
+    const cipher = createCipheriv(algorithm, secretKey, iv);
+    const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+    return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
 // Transform files to match KaraokeList component interface
 const files: KaraokeFile[] = dbFiles.map(file => ({
     id: file.id!,
@@ -30,7 +41,7 @@ const files: KaraokeFile[] = dbFiles.map(file => ({
     artist: file.artist,
     language: file.language,
     genre: file.genre || undefined,
-    fileUrl: file.file_url,
+    fileUrl: encrypt(file.file_url),
     lyricsUrl: file.lyrics_url || null,
     uploadedAt: new Date(file.uploaded_at!),
     duration: file.duration,
@@ -115,4 +126,4 @@ const totalPages = Math.ceil(total / limit);
             </div>
         )}
     </div>
-</AdminLayout> 
+</AdminLayout>

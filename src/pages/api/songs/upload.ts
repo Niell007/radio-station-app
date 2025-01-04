@@ -2,12 +2,23 @@ import type { APIRoute } from 'astro';
 import { requireAuth, type AuthenticatedRequest } from '../../../middleware/auth';
 import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
+import { createCipheriv, randomBytes } from 'crypto';
 
 const songSchema = z.object({
   title: z.string().min(1).max(100),
   artist: z.string().min(1).max(100),
   genre: z.string().optional()
 });
+
+const algorithm = 'aes-256-ctr';
+const secretKey = process.env.SECRET_KEY || 'your-secret-key';
+
+function encrypt(text: string) {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(algorithm, secretKey, iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
 
 export const POST: APIRoute = async (context) => {
   const authResponse = await requireAuth()(context);
@@ -30,6 +41,9 @@ export const POST: APIRoute = async (context) => {
     // Validate metadata
     const validatedData = songSchema.parse({ title, artist, genre });
 
+    // Encrypt song title
+    const encryptedTitle = encrypt(validatedData.title);
+
     // Upload file to R2
     const bucket = context.locals.runtime.env.BUCKET;
     const fileKey = `songs/${Date.now()}-${file.name}`;
@@ -45,7 +59,7 @@ export const POST: APIRoute = async (context) => {
     // Create song record
     const song = await prisma.song.create({
       data: {
-        title: validatedData.title,
+        title: encryptedTitle,
         artist: validatedData.artist,
         genre: validatedData.genre || null,
         fileUrl,
@@ -72,4 +86,4 @@ export const POST: APIRoute = async (context) => {
       { status: 500 }
     );
   }
-}; 
+};
