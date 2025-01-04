@@ -10,99 +10,252 @@ const currentDate = new Date().toLocaleDateString();
 
   <div class="mt-6 space-y-6">
     <section>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Music Library Management</h2>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Executive Summary</h2>
+      <p class="mt-2 text-gray-700 dark:text-gray-300">
+        The Radio Station App is currently in active development. Major achievements include the completion of the Karaoke System and User Authentication. Critical concerns include the integration with external music databases and the implementation of recurring schedules for Show Scheduling.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Component Status Dashboard</h2>
+      <div class="mt-2 space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Music Library Management</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Name and Version: Music Library Management v1.0</li>
+            <li>Core Functionality: Manage and organize the music library</li>
+            <li>Owner/Team Lead: John Doe</li>
+            <li>Development Stage: Development</li>
+            <li>Completion: 70%</li>
+            <li>Health: ●Yellow</li>
+            <li>Sprint Goal Status: On Track</li>
+            <li>Known Issues: Integration with external music databases</li>
+            <li>Dependencies: User Authentication</li>
+            <li>Risk Level: Medium</li>
+            <li>Next Milestone: 2023-12-15 - Integration with external music databases</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Karaoke System</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Name and Version: Karaoke System v1.0</li>
+            <li>Core Functionality: Provide karaoke features</li>
+            <li>Owner/Team Lead: Jane Smith</li>
+            <li>Development Stage: Production</li>
+            <li>Completion: 100%</li>
+            <li>Health: ●Green</li>
+            <li>Sprint Goal Status: On Track</li>
+            <li>Known Issues: None</li>
+            <li>Dependencies: Music Library Management</li>
+            <li>Risk Level: Low</li>
+            <li>Next Milestone: None</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Show Scheduling</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Name and Version: Show Scheduling v1.0</li>
+            <li>Core Functionality: Schedule and manage radio shows</li>
+            <li>Owner/Team Lead: Alice Johnson</li>
+            <li>Development Stage: Development</li>
+            <li>Completion: 50%</li>
+            <li>Health: ●Yellow</li>
+            <li>Sprint Goal Status: At Risk</li>
+            <li>Known Issues: Implementation of recurring schedules</li>
+            <li>Dependencies: User Authentication</li>
+            <li>Risk Level: Medium</li>
+            <li>Next Milestone: 2024-01-10 - Implementation of recurring schedules</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">User Authentication</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Name and Version: User Authentication v1.0</li>
+            <li>Core Functionality: Authenticate and manage users</li>
+            <li>Owner/Team Lead: Bob Brown</li>
+            <li>Development Stage: Production</li>
+            <li>Completion: 100%</li>
+            <li>Health: ●Green</li>
+            <li>Sprint Goal Status: On Track</li>
+            <li>Known Issues: None</li>
+            <li>Dependencies: None</li>
+            <li>Risk Level: Low</li>
+            <li>Next Milestone: None</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Admin Dashboard</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Name and Version: Admin Dashboard v1.0</li>
+            <li>Core Functionality: Provide administrative tools and insights</li>
+            <li>Owner/Team Lead: Charlie Green</li>
+            <li>Development Stage: Development</li>
+            <li>Completion: 60%</li>
+            <li>Health: ●Yellow</li>
+            <li>Sprint Goal Status: On Track</li>
+            <li>Known Issues: Need to add more analytics</li>
+            <li>Dependencies: User Authentication</li>
+            <li>Risk Level: Medium</li>
+            <li>Next Milestone: 2024-02-01 - Addition of more analytics</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Playlist Management</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Name and Version: Playlist Management v1.0</li>
+            <li>Core Functionality: Create and manage playlists</li>
+            <li>Owner/Team Lead: David White</li>
+            <li>Development Stage: Planning</li>
+            <li>Completion: 0%</li>
+            <li>Health: ●Red</li>
+            <li>Sprint Goal Status: Behind</li>
+            <li>Known Issues: None</li>
+            <li>Dependencies: Music Library Management</li>
+            <li>Risk Level: High</li>
+            <li>Next Milestone: 2024-03-01 - Start of development</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Performance Metrics</h2>
+      <div class="mt-2 space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">System Health</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Availability: 99.9%</li>
+            <li>Response Time: 200ms (95th percentile)</li>
+            <li>Error Rate: 0.1% (last 24h)</li>
+            <li>Resource Utilization:
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>CPU: 50%</li>
+                <li>Memory: 60%</li>
+                <li>Storage: 70% used</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quality Metrics</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Code Coverage: 80%</li>
+            <li>Failed Tests: 5</li>
+            <li>Open Bugs: 10 (2 critical, 3 major, 5 minor)</li>
+            <li>Technical Debt Score: Medium</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Infrastructure Status</h2>
+      <div class="mt-2 space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Critical Systems</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Database Health: Normal</li>
+            <li>API Status: All Operational</li>
+            <li>Security Posture: Strong</li>
+            <li>Deployment Pipeline: Functioning</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Action Items</h2>
+      <div class="mt-2 space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">High Priority</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Task: Integrate with external music databases
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>Owner: John Doe</li>
+                <li>Target completion date: 2023-12-15</li>
+                <li>Required resources: API keys, documentation</li>
+              </ul>
+            </li>
+            <li>Task: Implement recurring schedules for Show Scheduling
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>Owner: Alice Johnson</li>
+                <li>Target completion date: 2024-01-10</li>
+                <li>Required resources: Development time, testing</li>
+              </ul>
+            </li>
+            <li>Task: Add more analytics to Admin Dashboard
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>Owner: Charlie Green</li>
+                <li>Target completion date: 2024-02-01</li>
+                <li>Required resources: Data sources, development time</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Risk Mitigation</h3>
+          <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Risk: Integration with external music databases
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>Mitigation strategy: Research and select reliable APIs</li>
+                <li>Owner: John Doe</li>
+                <li>Timeline: 2023-12-01 to 2023-12-15</li>
+              </ul>
+            </li>
+            <li>Risk: Implementation of recurring schedules
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>Mitigation strategy: Allocate additional development resources</li>
+                <li>Owner: Alice Johnson</li>
+                <li>Timeline: 2023-12-15 to 2024-01-10</li>
+              </ul>
+            </li>
+            <li>Risk: Addition of more analytics
+              <ul class="mt-1 ml-4 list-disc list-inside">
+                <li>Mitigation strategy: Prioritize key metrics and data sources</li>
+                <li>Owner: Charlie Green</li>
+                <li>Timeline: 2024-01-01 to 2024-02-01</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Additional Notes</h2>
       <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
-        <li>Core functionality: Manage and organize the music library</li>
-        <li>Current status: In Progress</li>
-        <li>Completion percentage: 70%</li>
-        <li>Key milestones achieved: Basic CRUD operations implemented</li>
-        <li>Outstanding issues or blockers: Need to integrate with external music databases</li>
-        <li>Dependencies on other components: User Authentication</li>
-        <li>Target completion date: 2023-12-15</li>
-        <li>Metrics: 500 songs added</li>
-        <li>Quality concerns: None</li>
-        <li>Risk assessment: Medium</li>
+        <li>Blockers requiring management attention: Integration with external music databases</li>
+        <li>Resource constraints: Limited development resources for recurring schedules</li>
+        <li>External dependencies: API keys for external music databases</li>
+        <li>Upcoming significant changes: Addition of more analytics to Admin Dashboard</li>
       </ul>
     </section>
 
     <section>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Karaoke System</h2>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Attachments</h2>
       <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
-        <li>Core functionality: Provide karaoke features</li>
-        <li>Current status: Completed</li>
-        <li>Completion percentage: 100%</li>
-        <li>Key milestones achieved: Full karaoke functionality implemented</li>
-        <li>Outstanding issues or blockers: None</li>
-        <li>Dependencies on other components: Music Library Management</li>
-        <li>Target completion date: 2023-11-01</li>
-        <li>Metrics: 200 karaoke tracks available</li>
-        <li>Quality concerns: None</li>
-        <li>Risk assessment: Low</li>
+        <li>Relevant logs</li>
+        <li>Detailed metrics</li>
+        <li>Supporting documentation</li>
+        <li>Previous report comparison</li>
       </ul>
     </section>
 
     <section>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Show Scheduling</h2>
-      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
-        <li>Core functionality: Schedule and manage radio shows</li>
-        <li>Current status: In Progress</li>
-        <li>Completion percentage: 50%</li>
-        <li>Key milestones achieved: Basic scheduling implemented</li>
-        <li>Outstanding issues or blockers: Need to implement recurring schedules</li>
-        <li>Dependencies on other components: User Authentication</li>
-        <li>Target completion date: 2024-01-10</li>
-        <li>Metrics: 10 shows scheduled</li>
-        <li>Quality concerns: None</li>
-        <li>Risk assessment: Medium</li>
-      </ul>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Distribution</h2>
+      <p class="mt-2 text-gray-700 dark:text-gray-300">List key stakeholders: John Doe, Jane Smith, Alice Johnson, Bob Brown, Charlie Green, David White</p>
     </section>
 
     <section>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">User Authentication</h2>
-      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
-        <li>Core functionality: Authenticate and manage users</li>
-        <li>Current status: Completed</li>
-        <li>Completion percentage: 100%</li>
-        <li>Key milestones achieved: User login and registration implemented</li>
-        <li>Outstanding issues or blockers: None</li>
-        <li>Dependencies on other components: None</li>
-        <li>Target completion date: 2023-10-01</li>
-        <li>Metrics: 100 users registered</li>
-        <li>Quality concerns: None</li>
-        <li>Risk assessment: Low</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Admin Dashboard</h2>
-      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
-        <li>Core functionality: Provide administrative tools and insights</li>
-        <li>Current status: In Progress</li>
-        <li>Completion percentage: 60%</li>
-        <li>Key milestones achieved: Basic dashboard implemented</li>
-        <li>Outstanding issues or blockers: Need to add more analytics</li>
-        <li>Dependencies on other components: User Authentication</li>
-        <li>Target completion date: 2024-02-01</li>
-        <li>Metrics: 5 admin tools available</li>
-        <li>Quality concerns: None</li>
-        <li>Risk assessment: Medium</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Playlist Management</h2>
-      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
-        <li>Core functionality: Create and manage playlists</li>
-        <li>Current status: Not Started</li>
-        <li>Completion percentage: 0%</li>
-        <li>Key milestones achieved: None</li>
-        <li>Outstanding issues or blockers: None</li>
-        <li>Dependencies on other components: Music Library Management</li>
-        <li>Target completion date: 2024-03-01</li>
-        <li>Metrics: None</li>
-        <li>Quality concerns: None</li>
-        <li>Risk assessment: High</li>
-      </ul>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Next Report Due</h2>
+      <p class="mt-2 text-gray-700 dark:text-gray-300">2024-01-01</p>
     </section>
   </div>
 </AdminLayout>

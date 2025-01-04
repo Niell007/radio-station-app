@@ -151,3 +151,17 @@ The Radio Station App is currently in active development. Below is a summary of 
 ### Detailed Project Status Report
 
 For a detailed project status report, please visit the [Project Status Report](src/pages/admin/status-report.astro).
+
+## Generating and Updating the Project Status Report
+
+To generate and update the project status report, follow these steps:
+
+1. Navigate to the `src/pages/admin/status-report.astro` file.
+2. Update the executive summary section to provide an overview of current project health, major achievements, and critical concerns.
+3. Add a component status dashboard section for each major component, including component details, status indicators, and technical assessment.
+4. Add a performance metrics section to display system health and quality metrics.
+5. Add an infrastructure status section to display the status of critical systems.
+6. Add an action items section to list high priority tasks and risk mitigation strategies.
+7. Add an additional notes section to list blockers, resource constraints, external dependencies, and upcoming significant changes.
+8. Save the changes and commit them to the repository.
+9. Push the changes to the main branch to update the project status report.
