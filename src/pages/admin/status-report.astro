@@ -1,0 +1,108 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const currentDate = new Date().toLocaleDateString();
+---
+
+<AdminLayout title="Project Status Report">
+  <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Project Status Report</h1>
+  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">As of {currentDate}</p>
+
+  <div class="mt-6 space-y-6">
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Music Library Management</h2>
+      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+        <li>Core functionality: Manage and organize the music library</li>
+        <li>Current status: In Progress</li>
+        <li>Completion percentage: 70%</li>
+        <li>Key milestones achieved: Basic CRUD operations implemented</li>
+        <li>Outstanding issues or blockers: Need to integrate with external music databases</li>
+        <li>Dependencies on other components: User Authentication</li>
+        <li>Target completion date: 2023-12-15</li>
+        <li>Metrics: 500 songs added</li>
+        <li>Quality concerns: None</li>
+        <li>Risk assessment: Medium</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Karaoke System</h2>
+      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+        <li>Core functionality: Provide karaoke features</li>
+        <li>Current status: Completed</li>
+        <li>Completion percentage: 100%</li>
+        <li>Key milestones achieved: Full karaoke functionality implemented</li>
+        <li>Outstanding issues or blockers: None</li>
+        <li>Dependencies on other components: Music Library Management</li>
+        <li>Target completion date: 2023-11-01</li>
+        <li>Metrics: 200 karaoke tracks available</li>
+        <li>Quality concerns: None</li>
+        <li>Risk assessment: Low</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Show Scheduling</h2>
+      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+        <li>Core functionality: Schedule and manage radio shows</li>
+        <li>Current status: In Progress</li>
+        <li>Completion percentage: 50%</li>
+        <li>Key milestones achieved: Basic scheduling implemented</li>
+        <li>Outstanding issues or blockers: Need to implement recurring schedules</li>
+        <li>Dependencies on other components: User Authentication</li>
+        <li>Target completion date: 2024-01-10</li>
+        <li>Metrics: 10 shows scheduled</li>
+        <li>Quality concerns: None</li>
+        <li>Risk assessment: Medium</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">User Authentication</h2>
+      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+        <li>Core functionality: Authenticate and manage users</li>
+        <li>Current status: Completed</li>
+        <li>Completion percentage: 100%</li>
+        <li>Key milestones achieved: User login and registration implemented</li>
+        <li>Outstanding issues or blockers: None</li>
+        <li>Dependencies on other components: None</li>
+        <li>Target completion date: 2023-10-01</li>
+        <li>Metrics: 100 users registered</li>
+        <li>Quality concerns: None</li>
+        <li>Risk assessment: Low</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Admin Dashboard</h2>
+      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+        <li>Core functionality: Provide administrative tools and insights</li>
+        <li>Current status: In Progress</li>
+        <li>Completion percentage: 60%</li>
+        <li>Key milestones achieved: Basic dashboard implemented</li>
+        <li>Outstanding issues or blockers: Need to add more analytics</li>
+        <li>Dependencies on other components: User Authentication</li>
+        <li>Target completion date: 2024-02-01</li>
+        <li>Metrics: 5 admin tools available</li>
+        <li>Quality concerns: None</li>
+        <li>Risk assessment: Medium</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Playlist Management</h2>
+      <ul class="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+        <li>Core functionality: Create and manage playlists</li>
+        <li>Current status: Not Started</li>
+        <li>Completion percentage: 0%</li>
+        <li>Key milestones achieved: None</li>
+        <li>Outstanding issues or blockers: None</li>
+        <li>Dependencies on other components: Music Library Management</li>
+        <li>Target completion date: 2024-03-01</li>
+        <li>Metrics: None</li>
+        <li>Quality concerns: None</li>
+        <li>Risk assessment: High</li>
+      </ul>
+    </section>
+  </div>
+</AdminLayout>

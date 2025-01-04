@@ -89,7 +89,7 @@ const [showCount, songCount, playlistCount, userCount] = stats;
       <div class="flex items-center mb-2">
         <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
           <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
           </svg>
         </div>
         <div>
@@ -121,4 +121,14 @@ const [showCount, songCount, playlistCount, userCount] = stats;
       </table>
     </div>
   </div>
-</AdminLayout> 
+
+  <!-- Project Status Report -->
+  <div class="mt-8 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white">Project Status Report</h3>
+      <a href="/admin/status-report" class="inline-flex items-center p-2 text-sm font-medium rounded-lg text-primary-700 hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
+        View Report
+      </a>
+    </div>
+  </div>
+</AdminLayout>
