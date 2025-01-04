@@ -12,6 +12,10 @@ function encrypt(text: string) {
     const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
     return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
 }
+
+function refreshList() {
+    window.location.reload();
+}
 ---
 
 <AdminLayout title="Upload Karaoke Files">
@@ -29,6 +33,6 @@ function encrypt(text: string) {
                 </ul>
             </div>
         </div>
-        <KaraokeUploader client:load />
+        <KaraokeUploader onUploadComplete={refreshList} client:load />
     </div>
 </AdminLayout>

@@ -4,9 +4,8 @@ import { prisma } from '../../../lib/prisma';
 import { KaraokeUploader } from '../../../components/admin/KaraokeUploader';
 import { KaraokeList } from '../../../components/admin/KaraokeList';
 
-export async function getServerSideProps() {
-  // Fetch karaoke files with pagination
-  const page = 1; // TODO: Get from query params
+export async function getServerSideProps(context) {
+  const page = parseInt(context.query.page) || 1;
   const limit = 10;
   const skip = (page - 1) * limit;
 
@@ -47,6 +46,10 @@ interface KaraokePageProps {
 }
 
 export default function KaraokePage({ karaokeFiles, currentPage, totalPages }: KaraokePageProps) {
+  const refreshList = () => {
+    window.location.reload();
+  };
+
   return (
     <AdminLayout title="Karaoke Management">
       <div className="mb-8">
@@ -63,7 +66,7 @@ export default function KaraokePage({ karaokeFiles, currentPage, totalPages }: K
         <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
           Upload Karaoke Files
         </h2>
-        <KaraokeUploader />
+        <KaraokeUploader onUploadComplete={refreshList} />
       </div>
 
       {/* List Section */}
@@ -81,4 +84,4 @@ export default function KaraokePage({ karaokeFiles, currentPage, totalPages }: K
       </div>
     </AdminLayout>
   );
-} 
+}

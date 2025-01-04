@@ -4,6 +4,7 @@ import { KaraokeList } from '../../../components/admin/KaraokeList';
 import type { KaraokeFile } from '../../../components/admin/KaraokeList';
 import { KaraokeManager } from '../../../lib/karaoke';
 import { createCipheriv, randomBytes } from 'crypto';
+import KaraokeUploader from '../../../components/admin/KaraokeUploader';
 
 // Get query parameters
 const page = parseInt(Astro.url.searchParams.get('page') || '1');
@@ -52,6 +53,10 @@ const files: KaraokeFile[] = dbFiles.map(file => ({
 }));
 
 const totalPages = Math.ceil(total / limit);
+
+function refreshList() {
+    window.location.reload();
+}
 ---
 
 <AdminLayout title="Browse Karaoke Files">
@@ -111,6 +116,7 @@ const totalPages = Math.ceil(total / limit);
             </div>
 
             <div class="p-4">
+                <KaraokeUploader onUploadComplete={refreshList} client:load />
                 <KaraokeList
                     files={files}
                     currentPage={page}
