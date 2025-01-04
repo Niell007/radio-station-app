@@ -21,6 +21,8 @@ interface Env {
       data: Array<{ embedding: number[] }>;
     }>;
   };
+  CLOUDFLARE_API_TOKEN: string;
+  CLOUDFLARE_ACCOUNT_ID: string;
 }
 
 declare namespace App {

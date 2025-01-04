@@ -5,6 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
+CLOUDFLARE_API_TOKEN = "your_api_token"
+CLOUDFLARE_ACCOUNT_ID = "your_account_id"
 
 [ai]
 binding = "AI"
