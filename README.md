@@ -71,7 +71,7 @@ A modern web application for managing a radio station, built with Astro and depl
 1. Fork this repository
 2. Add the following secrets to your GitHub repository:
    - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
+   - `CLOUDFLRE_ACCOUNT_ID`
 
 3. Push to the main branch to trigger deployment
 
@@ -141,3 +141,13 @@ npm run prisma:migrate
 ## License
 
 MIT License - see LICENSE file for details
+
+## Project Status Report
+
+### Summary
+
+The Radio Station App is currently in active development. Below is a summary of the current status of the project.
+
+### Detailed Project Status Report
+
+For a detailed project status report, please visit the [Project Status Report](src/pages/admin/status-report.astro).
