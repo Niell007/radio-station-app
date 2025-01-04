@@ -103,39 +103,47 @@ export class KaraokeManager {
     }
 
     async create(file: KaraokeFile): Promise<number> {
-        this.validateKaraokeFile(file);
+        try {
+            this.validateKaraokeFile(file);
+        } catch (error) {
+            throw new KaraokeError(`Validation failed: ${error.message}`);
+        }
 
         const search_vector = this.generateSearchVector(file);
         const now = new Date().toISOString();
 
-        const result = await this.db.prepare(`
-            INSERT INTO karaoke_files (
-                title, artist, language, genre, file_url, lyrics_url,
-                duration, file_size, mime_type, search_vector, play_count,
-                rating, difficulty, is_explicit, is_active,
-                uploaded_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(
-            file.title,
-            file.artist,
-            file.language,
-            file.genre || null,
-            file.file_url,
-            file.lyrics_url || null,
-            file.duration,
-            file.file_size,
-            file.mime_type,
-            search_vector,
-            file.play_count || 0,
-            file.rating || null,
-            file.difficulty || null,
-            file.is_explicit ? 1 : 0,
-            file.is_active !== false ? 1 : 0,
-            now,
-            now
-        ).run();
+        try {
+            const result = await this.db.prepare(`
+                INSERT INTO karaoke_files (
+                    title, artist, language, genre, file_url, lyrics_url,
+                    duration, file_size, mime_type, search_vector, play_count,
+                    rating, difficulty, is_explicit, is_active,
+                    uploaded_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).bind(
+                file.title,
+                file.artist,
+                file.language,
+                file.genre || null,
+                file.file_url,
+                file.lyrics_url || null,
+                file.duration,
+                file.file_size,
+                file.mime_type,
+                search_vector,
+                file.play_count || 0,
+                file.rating || null,
+                file.difficulty || null,
+                file.is_explicit ? 1 : 0,
+                file.is_active !== false ? 1 : 0,
+                now,
+                now
+            ).run();
 
-        return result.meta.last_row_id || 0;
+            return result.meta.last_row_id || 0;
+        } catch (error) {
+            throw new KaraokeError(`Failed to create karaoke file: ${error.message}`);
+        }
     }
 
     async update(id: number, file: Partial<KaraokeFile>): Promise<void> {
@@ -145,38 +153,46 @@ export class KaraokeManager {
         }
 
         const updated = { ...current, ...file };
-        this.validateKaraokeFile(updated);
+        try {
+            this.validateKaraokeFile(updated);
+        } catch (error) {
+            throw new KaraokeError(`Validation failed: ${error.message}`);
+        }
 
         const search_vector = this.generateSearchVector(updated);
         const now = new Date().toISOString();
 
-        await this.db.prepare(`
-            UPDATE karaoke_files SET
-                title = ?, artist = ?, language = ?, genre = ?,
-                file_url = ?, lyrics_url = ?, duration = ?,
-                file_size = ?, mime_type = ?, search_vector = ?,
-                play_count = ?, rating = ?, difficulty = ?,
-                is_explicit = ?, is_active = ?, updated_at = ?
-            WHERE id = ?
-        `).bind(
-            updated.title,
-            updated.artist,
-            updated.language,
-            updated.genre || null,
-            updated.file_url,
-            updated.lyrics_url || null,
-            updated.duration,
-            updated.file_size,
-            updated.mime_type,
-            search_vector,
-            updated.play_count || 0,
-            updated.rating || null,
-            updated.difficulty || null,
-            updated.is_explicit ? 1 : 0,
-            updated.is_active !== false ? 1 : 0,
-            now,
-            id
-        ).run();
+        try {
+            await this.db.prepare(`
+                UPDATE karaoke_files SET
+                    title = ?, artist = ?, language = ?, genre = ?,
+                    file_url = ?, lyrics_url = ?, duration = ?,
+                    file_size = ?, mime_type = ?, search_vector = ?,
+                    play_count = ?, rating = ?, difficulty = ?,
+                    is_explicit = ?, is_active = ?, updated_at = ?
+                WHERE id = ?
+            `).bind(
+                updated.title,
+                updated.artist,
+                updated.language,
+                updated.genre || null,
+                updated.file_url,
+                updated.lyrics_url || null,
+                updated.duration,
+                updated.file_size,
+                updated.mime_type,
+                search_vector,
+                updated.play_count || 0,
+                updated.rating || null,
+                updated.difficulty || null,
+                updated.is_explicit ? 1 : 0,
+                updated.is_active !== false ? 1 : 0,
+                now,
+                id
+            ).run();
+        } catch (error) {
+            throw new KaraokeError(`Failed to update karaoke file: ${error.message}`);
+        }
     }
 
     async getById(id: number): Promise<KaraokeFile | null> {
@@ -371,4 +387,4 @@ export class KaraokeManager {
             total: countResult?.count || 0
         };
     }
-} 
+}

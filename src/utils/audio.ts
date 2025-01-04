@@ -10,7 +10,7 @@ export async function getAudioDuration(file: File): Promise<number> {
 
     audio.addEventListener('error', (error) => {
       URL.revokeObjectURL(url);
-      reject(error);
+      reject(new Error('Failed to calculate audio duration'));
     });
 
     audio.src = url;

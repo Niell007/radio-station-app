@@ -27,6 +27,49 @@ A modern web application for managing a radio station, built with Astro and depl
 - **Authentication**: JWT + Argon2
 - **Deployment**: [Cloudflare Pages](https://pages.cloudflare.com)
 
+## Technical Requirements
+
+- **Programming Language**: TypeScript
+- **Framework**: Astro 4.16.16
+- **Database**: Cloudflare D1
+- **Storage**: Cloudflare R2
+- **AI Features**: Cloudflare AI
+- **Authentication**: JWT + Argon2
+- **Deployment**: Cloudflare Pages
+- **Minimum System Requirements**: Node.js 20.11.1 or higher, npm 10 or higher
+
+## Project Structure Deliverables
+
+- Full directory structure
+- All source code files with detailed comments
+- Configuration files (environment variables, settings)
+- Database schemas and migrations
+- API documentation (if applicable)
+- Unit tests and integration tests
+- Deployment scripts
+- Docker configuration (if applicable)
+- CI/CD pipeline configuration
+- README.md with:
+  * Installation instructions
+  * Setup guide
+  * Usage examples
+  * API documentation
+  * Deployment procedures
+
+## Security Considerations
+
+- **Authentication**: Implemented using JWT and Argon2 for secure password hashing.
+- **Authorization**: Role-based access control to ensure users have appropriate permissions.
+- **Data Encryption**: Sensitive data such as passwords and session tokens are encrypted.
+- **Security Best Practices**: Regular security audits and updates to dependencies.
+- **Environment-specific Configurations**: Separate configurations for development, staging, and production environments.
+
+## Performance Requirements
+
+- **Expected Load Capacity**: The application is designed to handle up to 10,000 concurrent users.
+- **Response Time Targets**: Average response time should be under 200ms.
+- **Scalability Considerations**: The application is built to scale horizontally with the use of Cloudflare's serverless infrastructure.
+
 ## Prerequisites
 
 - Node.js 20.11.1 or higher
@@ -115,20 +158,6 @@ Run database migrations:
 ```bash
 npm run prisma:migrate
 ```
-
-## Security Considerations
-
-- **Authentication**: Implemented using JWT and Argon2 for secure password hashing.
-- **Authorization**: Role-based access control to ensure users have appropriate permissions.
-- **Data Encryption**: Sensitive data such as passwords and session tokens are encrypted.
-- **Security Best Practices**: Regular security audits and updates to dependencies.
-- **Environment-specific Configurations**: Separate configurations for development, staging, and production environments.
-
-## Performance Requirements
-
-- **Expected Load Capacity**: The application is designed to handle up to 10,000 concurrent users.
-- **Response Time Targets**: Average response time should be under 200ms.
-- **Scalability Considerations**: The application is built to scale horizontally with the use of Cloudflare's serverless infrastructure.
 
 ## Contributing
 

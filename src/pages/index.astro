@@ -7,6 +7,15 @@ const currentShow = {
   time: "6:00 AM - 10:00 AM",
   image: "/images/general/virtual_dj_logo.jpg"
 };
+
+const features = [
+  { name: 'Music Library Management', href: '/dashboard/music-library' },
+  { name: 'Karaoke System', href: '/dashboard/karaoke' },
+  { name: 'Show Scheduling', href: '/dashboard/shows' },
+  { name: 'User Authentication', href: '/login' },
+  { name: 'Admin Dashboard', href: '/admin' },
+  { name: 'Playlist Management', href: '/dashboard/playlists' }
+];
 ---
 
 <Layout title="Welcome">
@@ -70,6 +79,19 @@ const currentShow = {
           </button>
         </form>
       </section>
+
+      <!-- Project Overview Section -->
+      <section class="bg-white bg-opacity-10 p-6 rounded-lg backdrop-blur-sm">
+        <h2 class="text-xl font-bold text-white mb-4">Project Overview</h2>
+        <p class="text-gray-300 mb-4">The Radio Station App is designed to provide a comprehensive solution for managing a radio station. It includes features for music library management, karaoke system, show scheduling, user authentication, admin dashboard, and playlist management.</p>
+        <ul class="list-disc list-inside text-gray-300">
+          {features.map(feature => (
+            <li>
+              <a href={feature.href} class="text-blue-400 hover:underline">{feature.name}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   </main>
-</Layout> 
+</Layout>
